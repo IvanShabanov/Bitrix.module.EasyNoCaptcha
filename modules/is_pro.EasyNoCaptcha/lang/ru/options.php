@@ -15,9 +15,9 @@ $MESS['ISPRO_EasyNoCaptcha_DESCRIPTION'] = '
 <p>Проверить
 
 if (\ISPRO\ENC->CheckEasyNoCaptha ()) {
-	echo '<p>You are human</p>';
+	// human
  } else {
-	echo '<p>You are robot</p>';
+	// robot
  }
 </p>
 ';
