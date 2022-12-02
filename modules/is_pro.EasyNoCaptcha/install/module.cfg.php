@@ -27,6 +27,21 @@ $arModuleCfg = [
 			'default' => ''
 		],
 
+		'USE_HCAPTCHA' => [
+			'type' => 'checkbox',
+			'default' => 'N'
+		],
+
+		'HCAPTCHA_SITE_KEY' => [
+			'type' => 'text',
+			'default' => ''
+		],
+
+		'HCAPTCHA_SECRET_KEY' => [
+			'type' => 'text',
+			'default' => ''
+		],
+
 		'PROTECT_LEVEL' => [
 			'type' => 'text',
 			'default' => '3'
