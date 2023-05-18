@@ -16,9 +16,10 @@ $MESS['ISPRO_EasyNoCaptcha_DESCRIPTION'] = '
 
 if (\ISPRO\ENC->CheckEasyNoCaptha ()) {
 	// human
- } else {
+} else {
 	// robot
- }
+}
+
 </p>
 ';
 
@@ -44,6 +45,10 @@ $MESS['ISPRO_EasyNoCaptcha_RECAPTCHA_SECRET_KEY'] = 'ReCaptcha Секретны�
 $MESS['ISPRO_EasyNoCaptcha_USE_HCAPTCHA'] = 'Применять <a href="https://www.hcaptcha.com/" target="_blank">hCaptcha<a>';
 $MESS['ISPRO_EasyNoCaptcha_HCAPTCHA_SITE_KEY'] = 'hCaptcha Ключ сайта';
 $MESS['ISPRO_EasyNoCaptcha_HCAPTCHA_SECRET_KEY'] = 'hCaptcha Секретный Ключ <a href="https://dashboard.hcaptcha.com/settings" target="_blank">отсюда</a>';
+
+$MESS['ISPRO_EasyNoCaptcha_USE_YANDEXCAPTCHA'] = 'Применять <a href="https://cloud.yandex.ru/services/smartcaptcha" target="_blank">Yandex Smart Captcha<a> (в планах)';
+$MESS['ISPRO_EasyNoCaptcha_YANDEXCAPTCHA_SITE_KEY'] = 'Yandex Smart Captcha Ключ клиента';
+$MESS['ISPRO_EasyNoCaptcha_YANDEXCAPTCHA_SECRET_KEY'] = 'Yandex Smart Captcha Ключ сервера';
 
 $MESS['ISPRO_EasyNoCaptcha_PROTECT_LEVEL'] = 'Уровень защиты';
 $MESS['ISPRO_EasyNoCaptcha_FORM_SELECTOR'] = 'Селектор форм';

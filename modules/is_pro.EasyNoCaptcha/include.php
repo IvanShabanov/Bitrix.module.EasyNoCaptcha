@@ -3,15 +3,13 @@ if (file_exists(__DIR__ . "/install/module.cfg.php")) {
 	include(__DIR__ . "/install/module.cfg.php");
 };
 
-CModule::IncludeModule($arModuleCfg['MODULE_ID']);
-global $DBType;
+use Bitrix\Main\Loader;
+Loader::includeModule($arModuleCfg['MODULE_ID']);
 
 $arClasses=array(
 	/* Библиотеки и слассы для авто загрузки */
-	/*
-	'IS_PRO\module_name\lib'=>'lib/lib.php',
-    'IS_PRO\module_name\cMain_module_name'=>'classes/general/cMain_module_name.php'
-	*/
+	'IS_PRO\EasyNoCaptcha\EasyNoCaptcha_v4'=>'lib/easynocaptcha_v4.php',
+	'IS_PRO\EasyNoCaptcha\events'=>'lib/events.php',
 );
 
-CModule::AddAutoloadClasses($arModuleCfg['MODULE_ID'], $arClasses);
+Loader::registerAutoLoadClasses($arModuleCfg['MODULE_ID'], $arClasses);

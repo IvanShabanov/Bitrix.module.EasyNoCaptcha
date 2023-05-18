@@ -1,6 +1,6 @@
 <?
 $arModuleCfg = [
-	'MODULE_ID' => 'is_pro.EasyNoCaptcha',
+	'MODULE_ID' => 'is_pro.easy_no_captcha',
 	'options_list' => [
 		'MODULE_MODE' => [ 					/* Имя настройки */
 			'type' => 'select', 			/* Тип поля настройки */
@@ -42,6 +42,21 @@ $arModuleCfg = [
 			'default' => ''
 		],
 
+		'USE_YANDEXCAPTCHA' => [
+			'type' => 'checkbox',
+			'default' => 'N'
+		],
+
+		'YANDEXCAPTCHA_SITE_KEY' => [
+			'type' => 'text',
+			'default' => ''
+		],
+
+		'YANDEXCAPTCHA_SECRET_KEY' => [
+			'type' => 'text',
+			'default' => ''
+		],
+
 		'PROTECT_LEVEL' => [
 			'type' => 'text',
 			'default' => '3'
@@ -56,7 +71,6 @@ $arModuleCfg = [
 			'type' => 'checkbox',
 			'default' => 'N'
 		],
-
 
 		'IM_EVENT' => [
 			'type' => 'checkbox',

@@ -3,7 +3,7 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 Loc::loadMessages(__FILE__);
 
-Class is_pro_module_name extends CModule
+Class is_pro_easy_no_captcha extends CModule
 {
 	public function __construct()
 	{
@@ -46,6 +46,13 @@ Class is_pro_module_name extends CModule
 
 	public function InstallEvents()
 	{
+		RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
+		RegisterModuleDependences("blog", "OnBeforeBlogAdd", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "OnBeforeBlogAdd");
+		RegisterModuleDependences("im", "OnBeforeMessageNotifyAdd", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "OnBeforeMessageNotifyAdd");
+		RegisterModuleDependences("form", "onBeforeResultAdd", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "onBeforeResultAdd");
+		RegisterModuleDependences("iblock", "OnBeforeIBlockAddHandler", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "OnBeforeIBlockAddHandler");
+		RegisterModuleDependences("vote", "onBeforeVoteAdd", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "onBeforeVoteAdd");
+
 		/*
 		RegisterModuleDependences("main", "OnProlog", $this->MODULE_ID,"IS_PRO\module_name\Main", "OnProlog");
 		RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\module_name\Main", "OnEpilog");
