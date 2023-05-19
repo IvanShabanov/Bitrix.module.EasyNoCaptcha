@@ -67,17 +67,12 @@ $arModuleCfg = [
 			'default' => 'form'
 		],
 
-		'BLOG_EVENT' => [
-			'type' => 'checkbox',
-			'default' => 'N'
-		],
-
-		'IM_EVENT' => [
-			'type' => 'checkbox',
-			'default' => 'N'
-		],
-
 		'FORM_EVENT' => [
+			'type' => 'checkbox',
+			'default' => 'N'
+		],
+
+		'BLOG_EVENT' => [
 			'type' => 'checkbox',
 			'default' => 'N'
 		],
@@ -92,16 +87,6 @@ $arModuleCfg = [
 			'default' => 'N'
 		],
 
-		'SUPPORT_EVENT' => [
-			'type' => 'checkbox',
-			'default' => 'N'
-		],
-
-		'SALE_EVENT' => [
-			'type' => 'checkbox',
-			'default' => 'N'
-		],
-
 		'FORUM_EVENT' => [
 			'type' => 'checkbox',
 			'default' => 'N'
@@ -112,9 +97,14 @@ $arModuleCfg = [
 			'default' => ''
 		],
 
-		'EXCEPTIONS_URLS' => [
-			'type' => 'textarea',
-			'default' => ''
+		'CAPTCHA_ERROR' => [
+			'type' => 'text',
+			'default' => 'Защита от автоматического заполнения'
+		],
+
+		'LOG' => [
+			'type' => 'checkbox',
+			'default' => 'N'
 		],
 
 	]

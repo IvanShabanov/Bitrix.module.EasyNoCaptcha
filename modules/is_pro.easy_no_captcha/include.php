@@ -13,3 +13,5 @@ $arClasses=array(
 );
 
 Loader::registerAutoLoadClasses($arModuleCfg['MODULE_ID'], $arClasses);
+
+IS_PRO\EasyNoCaptcha\events::Setup();

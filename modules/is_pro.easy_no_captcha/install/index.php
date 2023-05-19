@@ -16,10 +16,10 @@ Class is_pro_easy_no_captcha extends CModule
 			$this->MODULE_ID 		   = $arModuleCfg['MODULE_ID'];
 			$this->MODULE_VERSION  	   = $arModuleVersion["VERSION"];
 			$this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"];
-			$this->MODULE_NAME 		   = Loc::getMessage("ISPRO_module_name_NAME");
-			$this->MODULE_DESCRIPTION  = Loc::getMessage("ISPRO_module_name_DESC");
-			$this->PARTNER_NAME 	   = Loc::getMessage("ISPRO_module_name_PARTNER_NAME");
-			$this->PARTNER_URI  	   = Loc::getMessage("ISPRO_module_name_PARTNER_URI");
+			$this->MODULE_NAME 		   = Loc::getMessage("ISPRO_EasyNoCaptcha_NAME");
+			$this->MODULE_DESCRIPTION  = Loc::getMessage("ISPRO_EasyNoCaptcha_DESC");
+			$this->PARTNER_NAME 	   = Loc::getMessage("ISPRO_EasyNoCaptcha_PARTNER_NAME");
+			$this->PARTNER_URI  	   = Loc::getMessage("ISPRO_EasyNoCaptcha_PARTNER_URI");
 		}
 		return false;
 	}
@@ -46,13 +46,9 @@ Class is_pro_easy_no_captcha extends CModule
 
 	public function InstallEvents()
 	{
-		RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
-		RegisterModuleDependences("blog", "OnBeforeBlogAdd", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "OnBeforeBlogAdd");
-		RegisterModuleDependences("im", "OnBeforeMessageNotifyAdd", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "OnBeforeMessageNotifyAdd");
-		RegisterModuleDependences("form", "onBeforeResultAdd", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "onBeforeResultAdd");
-		RegisterModuleDependences("iblock", "OnBeforeIBlockAddHandler", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "OnBeforeIBlockAddHandler");
-		RegisterModuleDependences("vote", "onBeforeVoteAdd", $this->MODULE_ID,  "IS_PRO\EasyNoCaptcha\Events", "onBeforeVoteAdd");
 
+		RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
+		RegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
 		/*
 		RegisterModuleDependences("main", "OnProlog", $this->MODULE_ID,"IS_PRO\module_name\Main", "OnProlog");
 		RegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\module_name\Main", "OnEpilog");
@@ -74,6 +70,8 @@ Class is_pro_easy_no_captcha extends CModule
 
 	public function UnInstallEvents()
 	{
+		UnRegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
+		UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\EasyNoCaptcha\Events", "Setup");
 		/*
 		UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\module_name\Main", "OnProlog");
 		UnRegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\module_name\Main", "OnEpilog");

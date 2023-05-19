@@ -106,7 +106,7 @@ foreach ($siteIds as $sId => $sName) {
 						$optionIsValid = 'File not loaded';
 					}
 					if ($optionIsValid !== true) {
-						$eeror_message .= 'ERROR: ' . Loc::getMessage('ISPRO_module_name_' . $option_name_def) . ' ' . $optionIsValid . PHP_EOL;
+						$eeror_message .= 'ERROR: ' . Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) . ' ' . $optionIsValid . PHP_EOL;
 					}
 				}
 				if ($request->getpost($option_name.'_del') == 'Y') {
@@ -119,7 +119,7 @@ foreach ($siteIds as $sId => $sName) {
 				$option[$option_name] = $request->getpost('option_' . $option_name);
 				$optionIsValid = checkOption($option_name_def, $option[$option_name]);
 				if ($optionIsValid !== true) {
-					$eeror_message .= 'ERROR: ' . Loc::getMessage('ISPRO_module_name_' . $option_name_def) . ' ' . $optionIsValid . PHP_EOL;
+					$eeror_message .= 'ERROR: ' . Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) . ' ' . $optionIsValid . PHP_EOL;
 				}
 				if (is_array($option[$option_name])) {
 					$option[$option_name] = json_encode($option[$option_name]);
@@ -139,7 +139,7 @@ foreach ($siteIds as $sId => $sName) {
 		};
 		if (($saveOption || $setDefault) && ($optionIsValid === true)) {
 			\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name_def, $option[$option_name], $sId);
-			$ok_message .= 'SAVED: ' . Loc::getMessage('ISPRO_module_name_' . $option_name_def) . PHP_EOL;
+			$ok_message .= 'SAVED: ' . Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) . PHP_EOL;
 		};
 
 		$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name_def,   $arOption['default'], $sId);
@@ -171,17 +171,17 @@ if ($eeror_message != '') {
 $tabList = [];
 $tabList[] = [
 	'DIV' => 'description',
-	'TAB' => Loc::getMessage('ISPRO_module_name_TAB_SET_DESC'),
+	'TAB' => Loc::getMessage('ISPRO_EasyNoCaptcha_TAB_SET_DESC'),
 	'ICON' => 'ib_settings',
-	'TITLE' => Loc::getMessage('ISPRO_module_name_TAB_TITLE_DESC')
+	'TITLE' => Loc::getMessage('ISPRO_EasyNoCaptcha_TAB_TITLE_DESC')
 ];
 
 foreach ($siteIds as $sId => $sName) {
 	$tabList[] = [
 		'DIV' => 'setting' . $sId,
-		'TAB' => Loc::getMessage('ISPRO_module_name_TAB_SET_OPTION') . ' (' . $sName . ')',
+		'TAB' => Loc::getMessage('ISPRO_EasyNoCaptcha_TAB_SET_OPTION') . ' (' . $sName . ')',
 		'ICON' => 'ib_settings',
-		'TITLE' => Loc::getMessage('ISPRO_module_name_TAB_TITLE_OPTION') . ' (' . $sName . ')'
+		'TITLE' => Loc::getMessage('ISPRO_EasyNoCaptcha_TAB_TITLE_OPTION') . ' (' . $sName . ')'
 	];
 }
 
@@ -205,7 +205,7 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 	<tr>
 		<td colspan="2">
 			<?= BeginNote(); ?>
-			<?= Loc::getMessage('ISPRO_module_name_DESCRIPTION'); ?>
+			<?= Loc::getMessage('ISPRO_EasyNoCaptcha_DESCRIPTION'); ?>
 			<?= EndNote(); ?>
 		</td>
 	</tr>
@@ -220,11 +220,11 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 			<? $option_name_def = $option_name; ?>
 			<? $option_name = $option_name . '_' . $sId; ?>
 			<tr>
-				<td width="20%" valign="top">
-					<?= Loc::getMessage('ISPRO_module_name_' . $option_name_def) ?>
+				<td width="50%" valign="top">
+					<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) ?>
 				</td>
 
-				<td width="80%">
+				<td width="50%">
 					<? if ($arOption['type'] == 'textarea') : ?>
 						<textarea name="option_<?= $option_name ?>"><?= HtmlFilter::encode($option[$option_name]) ?></textarea>
 					<? elseif ($arOption['type'] == 'checkbox') : ?>
@@ -234,7 +234,7 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 						<select name="option_<?= $option_name ?>">
 							<? foreach ($arOption['values'] as $value) : ?>
 								<option value="<?= $value ?>" <?= ($option[$option_name] == $value) ? 'selected' : '' ?>>
-									<?= Loc::getMessage('ISPRO_module_name_' . $option_name_def . '_' . $value) ?>
+									<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def . '_' . $value) ?>
 								</option>
 							<? endforeach ?>
 						</select>
@@ -263,10 +263,10 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 		<? endforeach ?>
 		<tr>
 			<td>
-				<?= Loc::getMessage('ISPRO_module_name_RESET'); ?>
+				<?= Loc::getMessage('ISPRO_EasyNoCaptcha_RESET'); ?>
 			</td>
 			<td>
-				<button type="submit" class="adm-btn" name="save" value="reset_<?= $sId ?>"><?= Loc::getMessage('ISPRO_module_name_RESET'); ?> (<?= $sName ?>)</button>
+				<button type="submit" class="adm-btn" name="save" value="reset_<?= $sId ?>"><?= Loc::getMessage('ISPRO_EasyNoCaptcha_RESET'); ?> (<?= $sName ?>)</button>
 			</td>
 		</tr>
 
@@ -274,7 +274,7 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 
 	<? $tabControl->Buttons(); ?>
 
-	<button type="submit" class="adm-btn adm-btn-save" name="save" value="save"><? echo Loc::getMessage('ISPRO_module_name_SAVE'); ?></button>
+	<button type="submit" class="adm-btn adm-btn-save" name="save" value="save"><? echo Loc::getMessage('ISPRO_EasyNoCaptcha_SAVE'); ?></button>
 
 
 	<? $tabControl->End(); ?>
