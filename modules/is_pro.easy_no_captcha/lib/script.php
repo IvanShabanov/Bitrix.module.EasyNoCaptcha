@@ -1,6 +1,4 @@
-<?
-global $APPLICATION, $DB, $USER;
-
+<?php
 set_time_limit(0);
 error_reporting(E_ERROR);
 
@@ -22,6 +20,17 @@ error_reporting(E_ERROR);
 @define('NO_AGENT_CHECK', true);
 
 require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php');
+global $APPLICATION, $DB, $USER;
+
+$APPLICATION->RestartBuffer();
+$app = \Bitrix\Main\Application::getInstance();
+$response = $app->getContext()->getResponse();
+$responseHeadersHandler = $response->getHeaders();
+$responseHeadersHandler->set('Content-Type', 'text/javascript; charset=UTF-8');
+
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
-	echo \IS_PRO\EasyNoCaptcha\Events::getScript();
+	$buffer = \IS_PRO\EasyNoCaptcha\Events::getScript();
 }
+
+$response->flush($buffer);
+$app->terminate();
