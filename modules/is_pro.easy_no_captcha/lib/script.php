@@ -1,6 +1,7 @@
 <?php
 set_time_limit(0);
-error_reporting(E_ERROR);
+error_reporting(0);
+@ini_set('display_errors', 0);
 
 // statistics off
 @define('STOP_STATISTIC', true);
@@ -27,6 +28,8 @@ $app = \Bitrix\Main\Application::getInstance();
 $response = $app->getContext()->getResponse();
 $responseHeadersHandler = $response->getHeaders();
 $responseHeadersHandler->set('Content-Type', 'text/javascript; charset=UTF-8');
+
+$buffer = "";
 
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	$buffer = \IS_PRO\EasyNoCaptcha\Events::getScript();
