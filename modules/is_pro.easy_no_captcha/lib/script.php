@@ -20,9 +20,18 @@ error_reporting(0);
 // dont run agents
 @define('NO_AGENT_CHECK', true);
 
+$server = $_SERVER;
+$host     = isset($server['HTTP_X_FORWARDED_HOST']) ? $server['HTTP_X_FORWARDED_HOST']
+			: (isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : null);
+[$host, $port] = explode(':', $host);
+
+if (empty($host) || (mb_strpos($_SERVER['HTTP_REFERER'], $host) === false)) {
+	die;
+};
+
 require($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php');
 global $APPLICATION, $DB, $USER;
-
+global $arLog;
 $APPLICATION->RestartBuffer();
 $app = \Bitrix\Main\Application::getInstance();
 $response = $app->getContext()->getResponse();
