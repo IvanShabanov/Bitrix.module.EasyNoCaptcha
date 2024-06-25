@@ -41,6 +41,8 @@ class Events
 
 		[,$option['URL_PATH']] = explode($option['DOCUMENT_ROOT'], __DIR__);
 
+		$option['MODULE_ID'] = $arModuleCfg['MODULE_ID'];
+
 		return $option;
 	}
 
@@ -79,6 +81,8 @@ class Events
 		}
 		$ENC = self::ENC();
 		$result  = $ENC->CheckEasyNoCaptha();
+		$event = new \Bitrix\Main\Event($option['MODULE_ID'], "AfterCheckEasyNoCaptha", [&$result, &$param1, &$param2, &$param3, &$param4, &$param5, &$param6]);
+		$event->send();
 		if (!$result) {
 			if ($option['LOG'] == 'Y') {
 				\CEventLog::Add(array(
@@ -131,6 +135,12 @@ class Events
 
 		$arEvents = array_merge($arEvents, $arCustomEvents);
 
+		if ((int) $option['SORT'] > 0) {
+			$sort = (int) $option['SORT'];
+		} else {
+			$sort = 100;
+		}
+
 		foreach ($arEvents as $event) {
 			$event = trim($event);
 			if ($event == '') {
@@ -148,7 +158,7 @@ class Events
 				}
 			}
 
-			$eventManager->addEventHandler($module, $event, ['IS_PRO\EasyNoCaptcha\Events', 'CheckCaptcha']);
+			$eventManager->addEventHandler($module, $event, ['IS_PRO\EasyNoCaptcha\Events', 'CheckCaptcha'], $sort);
 		}
 
 		$EasyNoCaptchaStatus = 'inited';

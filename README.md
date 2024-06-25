@@ -21,3 +21,19 @@
 			echo "Вы подозрительно похожи на бота";
 		}
 	}
+
+Для дополнительной проверки или измененя результатов проверки каптчи
+
+	$eventManager = \Bitrix\Main\EventManager::getInstance();
+	$eventManager->addEventHandler("is_pro.easy_no_captcha", "AfterCheckEasyNoCaptha", "AfterCheckEasyNoCaptha");
+
+	function AfterCheckEasyNoCaptha(\Bitrix\Main\Event $event)
+	{
+		$arParam = $event->getParameters();
+		/* в $arParam[1-7] - параметры события, в котором проверялась каптча */
+
+		$arResult = &$arParam[0]; /* после проверки Каптчи тут true/false */
+
+		/* Какой-то код меняющий $arResult */
+
+	}

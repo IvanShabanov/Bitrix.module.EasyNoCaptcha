@@ -67,6 +67,11 @@ $arModuleCfg = [
 			'default' => 'form'
 		],
 
+		'SORT' => [
+			'type' => 'text',
+			'default' => '100'
+		],
+
 		'FORM_EVENT' => [
 			'type' => 'checkbox',
 			'default' => 'N'

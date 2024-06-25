@@ -23,6 +23,23 @@ if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	}
 }
 </pre>
+
+<p>Для дополнительной проверки или измененя результатов проверки каптчи</p>
+<pre>
+$eventManager = \Bitrix\Main\EventManager::getInstance();
+$eventManager->addEventHandler("is_pro.easy_no_captcha", "AfterCheckEasyNoCaptha", "AfterCheckEasyNoCaptha");
+
+function AfterCheckEasyNoCaptha(\Bitrix\Main\Event $event)
+{
+	$arParam = $event->getParameters();
+	/* в $arParam[1-7] - параметры события, в котором проверялась каптча */
+
+	$arResult = &$arParam[0]; /* после проверки Каптчи тут true/false */
+
+	/* Какой-то код меняющий $arResult */
+
+}
+</pre>
 ';
 
 $MESS['ISPRO_EasyNoCaptcha_TAB_SET_OPTION'] = 'Настройки';
@@ -51,6 +68,7 @@ $MESS['ISPRO_EasyNoCaptcha_YANDEXCAPTCHA_SECRET_KEY'] = 'Yandex Smart Captcha К
 
 $MESS['ISPRO_EasyNoCaptcha_PROTECT_LEVEL'] = 'Уровень защиты';
 $MESS['ISPRO_EasyNoCaptcha_FORM_SELECTOR'] = 'Селектор форм';
+$MESS['ISPRO_EasyNoCaptcha_SORT'] = 'Сортировка (очередь) события проверки Каптчи. (На случай если у вас есть обработчики модифицирющие значения форм)';
 
 $MESS['ISPRO_EasyNoCaptcha_BLOG_EVENT'] = 'Защитить модуль "Блоги"';
 $MESS['ISPRO_EasyNoCaptcha_FORM_EVENT'] = 'Защитить модуль "Веб-формы"';
