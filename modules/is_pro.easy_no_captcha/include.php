@@ -4,7 +4,7 @@ if (file_exists(__DIR__ . "/install/module.cfg.php")) {
 };
 
 use Bitrix\Main\Loader;
-Loader::includeModule($arModuleCfg['MODULE_ID']);
+//Loader::includeModule($arModuleCfg['MODULE_ID']);
 
 $arClasses=array(
 	/* Библиотеки и слассы для авто загрузки */
