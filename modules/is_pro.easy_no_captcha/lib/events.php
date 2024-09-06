@@ -53,7 +53,7 @@ class Events
 			return;
 		}
 
-		$ENC = new EasyNoCaptcha_v4([
+		$ENC = new EasyNoCaptcha([
 			'encode' => true,
 			'checkDefault' => true,
 			'checkIP' => true,
@@ -172,7 +172,7 @@ class Events
 			return '';
 		}
 
-		$ENC = new EasyNoCaptcha_v4([
+		$ENC = new EasyNoCaptcha([
 			'encode' => true,
 			'checkDefault' => true,
 			'checkIP' => true,
@@ -185,7 +185,8 @@ class Events
 			'YandexSmartCaptcha_secretkey' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SECRET_KEY'] : '',
 			'script_attributes' => '',
 			'debug' => false,
-			'forms_selector' => $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form'
+			'forms_selector' => $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form',
+			'InitOnJsEvent' => $option['INIT_JS_EVENT'] ? $option['INIT_JS_EVENT'] : 'DOMContentLoaded'
 		]);
 
 		$enc_script  = $ENC->SetEasyNoCaptcha($option['PROTECT_LEVEL'], $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form');

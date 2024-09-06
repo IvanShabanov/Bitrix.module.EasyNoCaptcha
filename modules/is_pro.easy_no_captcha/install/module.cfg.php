@@ -107,6 +107,11 @@ $arModuleCfg = [
 			'default' => 'Защита от автоматического заполнения'
 		],
 
+		'INIT_JS_EVENT' => [
+			'type' => 'text',
+			'default' => 'DOMContentLoaded'
+		],
+
 		'LOG' => [
 			'type' => 'checkbox',
 			'default' => 'N'

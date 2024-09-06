@@ -8,7 +8,7 @@ use Bitrix\Main\Loader;
 
 $arClasses=array(
 	/* Библиотеки и слассы для авто загрузки */
-	'IS_PRO\EasyNoCaptcha\EasyNoCaptcha_v4'=>'lib/easynocaptcha_v4.php',
+	'IS_PRO\EasyNoCaptcha\EasyNoCaptcha'=>'lib/easynocaptcha.php',
 	'IS_PRO\EasyNoCaptcha\events'=>'lib/events.php',
 );
 
