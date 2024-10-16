@@ -41,7 +41,7 @@ $responseHeadersHandler->set('Content-Type', 'text/javascript; charset=UTF-8');
 $buffer = "";
 
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
-	$buffer = \IS_PRO\EasyNoCaptcha\Events::getScript();
+	$buffer = \IS_PRO\EasyNoCaptcha\Common::getScript(['ReturnPureJS' => true]);
 }
 
 $response->flush($buffer);

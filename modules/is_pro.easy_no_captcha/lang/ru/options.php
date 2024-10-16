@@ -3,7 +3,7 @@ $MESS['ISPRO_EasyNoCaptcha_TAB_SET_DESC'] = 'Описание';
 $MESS['ISPRO_EasyNoCaptcha_TAB_TITLE_DESC'] = 'Описание модуля';
 
 $MESS['ISPRO_EasyNoCaptcha_DESCRIPTION'] = '
-<h3>Каптча на формы сайта.</h3>
+<h2>Каптча на формы сайта.</h2>
 <p>Защищает формы публичной части сайта</p>
 <p>Модуль не работает если авторизован администратор сайта</p>
 <p>Возможности:
@@ -14,8 +14,8 @@ $MESS['ISPRO_EasyNoCaptcha_DESCRIPTION'] = '
 		<li><a href="https://cloud.yandex.ru/services/smartcaptcha" target="_blank">Yandex Smart Captcha</a></li>
 	</ul>
 </p>
-<h3>Для разработчиков</h3>
-<p>Проверить отправлена ли форма ботом или нет</p>
+<h2>Для разработчиков</h2>
+<h3>Проверить отправлена ли форма ботом или нет</h3>
 <pre>
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	if (!\IS_PRO\EasyNoCaptcha\Events::CheckCaptcha()) {
@@ -24,7 +24,7 @@ if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 }
 </pre>
 
-<p>Для дополнительной проверки или измененя результатов проверки каптчи</p>
+<h3>Для дополнительной проверки или измененя результатов проверки каптчи</h3>
 <pre>
 $eventManager = \Bitrix\Main\EventManager::getInstance();
 $eventManager->addEventHandler("is_pro.easy_no_captcha", "AfterCheckEasyNoCaptha", "AfterCheckEasyNoCaptha");
@@ -38,6 +38,31 @@ function AfterCheckEasyNoCaptha(\Bitrix\Main\Event $event)
 
 	/* Какой-то код меняющий $arResult */
 
+}
+</pre>
+<h3>Можно использовать установленный модуль, без включения его на сайте (в настройках модуля)</h3>
+
+<p>Добавить каптчу к определенной форме, то где либо в некушируемой (!) области вывести (так как скрипт гшенерируется каждый раз новый)</p>
+
+<pre>
+<?php
+if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
+	$customOptions = [
+		"forms_selector" => ".myformSelector",
+		// "ReturnPureJS" => true // Если надо вернуть script без обрамления в теги <script>
+	];
+	$script = \IS_PRO\EasyNoCaptcha\Common::getScript($customOptions);
+	echo $script;
+}
+?>
+</pre>
+
+<p>Проверка формы</p>
+<pre>
+if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
+	if (!\IS_PRO\EasyNoCaptcha\Common::CheckCaptcha()) {
+		echo "Вы подозрительно похожи на бота";
+	}
 }
 </pre>
 ';
