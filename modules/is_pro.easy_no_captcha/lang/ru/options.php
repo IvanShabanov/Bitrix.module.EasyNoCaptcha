@@ -45,7 +45,6 @@ function AfterCheckEasyNoCaptha(\Bitrix\Main\Event $event)
 <p>Добавить каптчу к определенной форме, то где либо в некушируемой (!) области вывести (так как скрипт гшенерируется каждый раз новый)</p>
 
 <pre>
-<?php
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	$customOptions = [
 		"forms_selector" => ".myformSelector",
@@ -54,7 +53,6 @@ if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	$script = \IS_PRO\EasyNoCaptcha\Common::getScript($customOptions);
 	echo $script;
 }
-?>
 </pre>
 
 <p>Проверка формы</p>
