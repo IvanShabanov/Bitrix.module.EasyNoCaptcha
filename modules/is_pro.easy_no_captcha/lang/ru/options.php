@@ -48,7 +48,7 @@ function AfterCheckEasyNoCaptha(\Bitrix\Main\Event $event)
 if (\Bitrix\Main\Loader::includeModule("is_pro.easy_no_captcha")) {
 	$customOptions = [
 		"forms_selector" => ".myformSelector",
-		// "ReturnPureJS" => true // Если надо вернуть script без обрамления в теги <script>
+		// "ReturnPureJS" => true // Если надо вернуть script без обрамления в теги &lt;script&gt;
 	];
 	$script = \IS_PRO\EasyNoCaptcha\Common::getScript($customOptions);
 	echo $script;
