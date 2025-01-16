@@ -22,7 +22,7 @@ if (!class_exists('EasyNoCaptcha')) {
 				'hCaptcha_key' => '',
 				'hCaptcha_SecretKey' => '',
 				'YandexSmartCaptcha_key' => '',
-				'YandexSmartCaptcha_secretkey' => '',
+				'YandexSmartCaptcha_SecretKey' => '',
 				'script_attributes' => '',
 				'debug' => false,
 				'debug_to_file' => true,
@@ -110,6 +110,11 @@ if (!class_exists('EasyNoCaptcha')) {
 
 			$_ENC_script['code'] = '';
 			$_ENC_script['init'] = '';
+
+
+			$_ENC_script['code'] .= '/* '.print_r($this->_ENC_setting, true) .' */';
+
+
 			if (($this->_ENC_setting['GoogleReCaptcha_key'] != '') && ($this->_ENC_setting['GoogleRecaptcha_SecretKey'] != '')) {
 				$_ENC_script['code'] .= $this->SetGoogleReCaptcha();
 				$_ENC_script['init'] .= $this->getCryptWord('ENC_initGR') . '();';
@@ -506,7 +511,7 @@ if (!class_exists('EasyNoCaptcha')) {
 						let ' . $T['document1'] . ' = document;
 						let ' . $T['script1'] . ' = ' . $T['document1'] . '["createElement"]("script");
 						' . $T['script1'] . '["type"] = \'text/javascript\';
-						' . $T['script1'] . '["src"] = \'https://captcha-api.yandex.ru/captcha.js?render=onload&onload=' . $T['ENC_onloadYSC'] . '\';
+						' . $T['script1'] . '["src"] = \'https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=' . $T['ENC_onloadYSC'] . '\';
 						' . $T['document1'] . '["getElementsByTagName"]("head")[0].appendChild(' . $T['script1'] . ');
 						' . $T['YSC_need_add_script'] . '=0;
 					};
@@ -529,16 +534,20 @@ if (!class_exists('EasyNoCaptcha')) {
 						let dy = document;
 						let ' . $T['YSC'] . ' = dy["createElement"]("div");
 						' . $T['YSC'] . '["setAttribute"]("class", "smart-captcha");
-						' . $T['YSC'] . '["setAttribute"]("style", "max-width: 300px");
-						' . $T['form1'] . '["appendChild"](' . $T['YSC'] . ');
-
+						' . $T['YSC'] . '["setAttribute"]("style", "max-width: 300px; margin: 7px;");
+						let subm = ' . $T['form1'] . '.querySelector("*[type=submit]");
+						if (subm) {
+							subm.insertAdjacentElement("beforebegin", ' . $T['YSC'] . ');
+						} else {
+							' . $T['form1'] . '["appendChild"](' . $T['YSC'] . ');
+						};
 					};
 				};
 				const ' . $T['ENC_onloadYSC'] . ' = () => {
 					let dyYsc = document;
 					if (!window.smartCaptcha) {
 						return;
-					}
+					};
 					let containers = dyYsc["querySelectorAll"](".smart-captcha:not(.rendered)");
 					if (containers.length > 0) {
 						containers.forEach((cont) => {
@@ -550,13 +559,13 @@ if (!class_exists('EasyNoCaptcha')) {
 									shieldPosition: "top-left",
 									callback: ' . $T['ENC_callbackYSC'] . ',
 								});
-							}
+							};
 						});
-					}
+					};
 				};
 				const ' . $T['ENC_callbackYSC'] . ' = (token) => {
 					window.smartCaptcha.execute();
-				}
+				};
 			';
 			return $result;
 		}
@@ -569,7 +578,7 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (empty($this->_ENC_setting['YandexSmartCaptcha_key'])) {
 				$result = true;
 			} else if (isset($_REQUEST['smart-token'])) {
-				$url = "https://captcha-api.yandex.ru/validate";
+				$url = "https://smartcaptcha.yandexcloud.net/validate";
 				$postdata = [
 					'secret' => $this->_ENC_setting['YandexSmartCaptcha_SecretKey'],
 					'IP' => $this->curArray['IP'],
@@ -578,6 +587,7 @@ if (!class_exists('EasyNoCaptcha')) {
 				if ($response = $this->curl($url, $postdata)) {
 					$arrResponse = $this->json_decode($response);
 					if ($this->_ENC_setting['debug']) {
+						$this->log($postdata);
 						$this->log($arrResponse);
 					}
 					if (
@@ -716,6 +726,7 @@ if (!class_exists('EasyNoCaptcha')) {
 
 			if ($this->_ENC_setting['debug']) {
 				$this->log($url . "\t" . $httpcode);
+				$this->log($postdata);
 				$this->log($response);
 			}
 
@@ -732,14 +743,23 @@ if (!class_exists('EasyNoCaptcha')) {
 			};
 
 			$trace = debug_backtrace();
-			$class = $trace[0]["class"];
-			$function = $trace[0]["function"];
-			$line = $trace[0]["line"];
+			$texttrace = '';
+			if (is_array($trace)) {
+				foreach($trace as $key => $itemtrace) {
+					$class    = $itemtrace["class"];
+					$function = $itemtrace["function"];
+					$line     = $itemtrace["line"];
+					$texttrace .= $class . '->' . $function . ':' . $line . "\n";
+					if ($key >= 3) {
+						break;
+					}
+				}
+			}
 
 			$text =
 				date('Y.m.d H:i:s') .
-				"\t" .
-				$class . '->' . $function . ':' . $line . "\n"
+				"\n" .
+				$texttrace
 				. $text . "\n";
 
 			if ($this->_ENC_setting['debug_to_file']) {

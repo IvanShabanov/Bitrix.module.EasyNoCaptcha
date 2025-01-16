@@ -77,7 +77,7 @@ class Common
 			'hCaptcha_key' => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SITE_KEY'] : '',
 			'hCaptcha_SecretKey' => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SECRET_KEY'] : '',
 			'YandexSmartCaptcha_key' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SITE_KEY'] : '',
-			'YandexSmartCaptcha_secretkey' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SECRET_KEY'] : '',
+			'YandexSmartCaptcha_SecretKey' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SECRET_KEY'] : '',
 			'script_attributes' => !empty($option['script_attributes']) ? $option['script_attributes'] : '',
 			'debug' => $option['debugENC'] ? true : false,
 			'forms_selector' => $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form'
