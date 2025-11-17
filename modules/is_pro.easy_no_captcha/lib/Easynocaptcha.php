@@ -13,25 +13,26 @@ if (!class_exists('EasyNoCaptcha')) {
 		function __construct(array $setting = [])
 		{
 			$this->_ENC_setting = [
-				'encode' => true,
-				'checkDefault' => true,
-				'checkIP' => true,
-				'ReturnPureJS' => false,
-				'GoogleReCaptcha_key' => '',
-				'GoogleRecaptcha_SecretKey' => '',
-				'hCaptcha_key' => '',
-				'hCaptcha_SecretKey' => '',
-				'YandexSmartCaptcha_key' => '',
+				'encode'                       => true,
+				'checkDefault'                 => true,
+				'checkByAlert'                 => false,
+				'checkIP'                      => true,
+				'ReturnPureJS'                 => false,
+				'GoogleReCaptcha_key'          => '',
+				'GoogleRecaptcha_SecretKey'    => '',
+				'hCaptcha_key'                 => '',
+				'hCaptcha_SecretKey'           => '',
+				'YandexSmartCaptcha_key'       => '',
 				'YandexSmartCaptcha_SecretKey' => '',
-				'script_attributes' => '',
-				'debug' => false,
-				'debug_to_file' => true,
-				'debug_to_global_array' => false,
-				'forms_selector' => 'form',
-				'InitOnJsEvent' => 'DOMContentLoaded'
+				'script_attributes'            => '',
+				'debug'                        => false,
+				'debug_to_file'                => true,
+				'debug_to_global_array'        => false,
+				'forms_selector'               => 'form',
+				'InitOnJsEvent'                => 'DOMContentLoaded'
 			];
 
-			if (count($setting) > 0) {
+			if (!empty($setting) && is_array($setting)) {
 				foreach ($setting as $key => $val) {
 					if (isset($this->_ENC_setting[$key])) {
 						$this->_ENC_setting[$key] = $val;
@@ -40,9 +41,9 @@ if (!class_exists('EasyNoCaptcha')) {
 			}
 
 			$this->curArray = [
-				'DATE' => time(),
-				'IP' => $_SERVER['REMOTE_ADDR'],
-				'URL' => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+				'DATE'    => time(),
+				'IP'      => $_SERVER['REMOTE_ADDR'],
+				'URL'     => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
 				'REFERER' => $_SERVER['HTTP_REFERER']
 			];
 
@@ -69,18 +70,19 @@ if (!class_exists('EasyNoCaptcha')) {
 		public function SetEasyNoCaptcha($_protect = 3, $_form = 'form')
 		{
 			$this->_ENC_setting['form_selector'] = $_form;
-			$HASHCODE = substr(md5(uniqid()), 0, rand(10, 32));
-			$HASH = substr(md5(uniqid()), 0, rand(10, 32));
+			$HASHCODE                            = substr(md5(uniqid()), 0, rand(10, 32));
+			$HASH                                = substr(md5(uniqid()), 0, rand(10, 32));
 			if (!$this->_ENC_setting['checkDefault']) {
 				$HASHCODE = md5('HASHCODE');
-				$HASH = md5('HASH');
-			};
-			$_SESSION['MYHASH'][$HASHCODE] = $this->curArray;
+				$HASH     = md5('HASH');
+			}
+			;
+			$_SESSION['MYHASH'][$HASHCODE]          = $this->curArray;
 			$_SESSION['MYHASH'][$HASHCODE]['VALUE'] = $HASH;
-			$_SESSION['MYHASH'][$HASHCODE]['DATE'] = date('YmdHis');
+			$_SESSION['MYHASH'][$HASHCODE]['DATE']  = date('YmdHis');
 
-			$_InitedForm =  substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
-			$_CheckedForm =  substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
+			$_InitedForm  = substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
+			$_CheckedForm = substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
 
 
 			$this->addCryptWord('HASHCODE');
@@ -112,23 +114,26 @@ if (!class_exists('EasyNoCaptcha')) {
 			$_ENC_script['init'] = '';
 
 
-			$_ENC_script['code'] .= '/* '.print_r($this->_ENC_setting, true) .' */';
+			$_ENC_script['code']  .= '/* ' . print_r($this->_ENC_setting, true) . ' */';
 
+			if ($this->_ENC_setting['checkByAlert']) {
+
+			}
 
 			if (($this->_ENC_setting['GoogleReCaptcha_key'] != '') && ($this->_ENC_setting['GoogleRecaptcha_SecretKey'] != '')) {
-				$_ENC_script['code'] .= $this->SetGoogleReCaptcha();
-				$_ENC_script['init'] .= $this->getCryptWord('ENC_initGR') . '();';
-			};
+				$_ENC_script['code']  .= $this->SetGoogleReCaptcha();
+				$_ENC_script['init']  .= $this->getCryptWord('ENC_initGR') . '();';
+			}
 
 			if (($this->_ENC_setting['hCaptcha_key'] != '') && ($this->_ENC_setting['hCaptcha_SecretKey'] != '')) {
-				$_ENC_script['code'] .= $this->SetHCaptcha();
-				$_ENC_script['init'] .= $this->getCryptWord('ENC_initHC') . '();';
-			};
+				$_ENC_script['code']  .= $this->SetHCaptcha();
+				$_ENC_script['init']  .= $this->getCryptWord('ENC_initHC') . '();';
+			}
 
 			if (($this->_ENC_setting['YandexSmartCaptcha_key'] != '') && ($this->_ENC_setting['YandexSmartCaptcha_SecretKey'] != '')) {
-				$_ENC_script['code'] .= $this->SetYandexSmartCaptcha();
-				$_ENC_script['init'] .= $this->getCryptWord('ENC_initYSC') . '();';
-			};
+				$_ENC_script['code']  .= $this->SetYandexSmartCaptcha();
+				$_ENC_script['init']  .= $this->getCryptWord('ENC_initYSC') . '();';
+			}
 
 
 
@@ -136,7 +141,7 @@ if (!class_exists('EasyNoCaptcha')) {
 
 
 			$result = '
-				document["addEventListener"]("'.$this->_ENC_setting['InitOnJsEvent'].'", function(event) {
+				document["addEventListener"]("' . $this->_ENC_setting['InitOnJsEvent'] . '", function(event) {
 					const ' . $T['document2'] . ' = document;
 					let ' . $T['chechsum'] . ' = 0;
 
@@ -210,9 +215,9 @@ if (!class_exists('EasyNoCaptcha')) {
 				if (is_array($arResult)) {
 					$result = '';
 					foreach ($arResult as $r) {
-						$result .= trim($r);
-					};
-				};
+						$result  .= trim($r);
+					}
+				}
 			}
 
 			if (!$this->_ENC_setting['ReturnPureJS']) {
@@ -238,7 +243,7 @@ if (!class_exists('EasyNoCaptcha')) {
 						$this->CheckYandexSmartCaptcha()
 					);
 				unset($_SESSION['MYHASH'][$_REQUEST['HASHCODE']]);
-			};
+			}
 			return $result;
 		}
 		/**********************/
@@ -267,8 +272,8 @@ if (!class_exists('EasyNoCaptcha')) {
 				if ($this->curArray['IP'] != $session['IP']) {
 					/* IP не совпадают */
 					$result = false;
-				};
-			};
+				}
+			}
 			return $result;
 		}
 
@@ -278,7 +283,7 @@ if (!class_exists('EasyNoCaptcha')) {
 
 		public function AddGoogleRecaptcha($key, $secret)
 		{
-			$this->_ENC_setting['GoogleReCaptcha_key'] = $key;
+			$this->_ENC_setting['GoogleReCaptcha_key']       = $key;
 			$this->_ENC_setting['GoogleRecaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
@@ -298,9 +303,9 @@ if (!class_exists('EasyNoCaptcha')) {
 			$this->addCryptWord('grecaptcha');
 			$this->addCryptWord('GoogleRecaptcha_Action');
 
-			$T = $this->_ENC_string;
-			$GoogleRecaptcha_Action =  $T['GoogleRecaptcha_Action'];
-			$result = '
+			$T                      = $this->_ENC_string;
+			$GoogleRecaptcha_Action = $T['GoogleRecaptcha_Action'];
+			$result                 = '
 				let ' . $T['GR_need_add_script'] . '=1;
 				const ' . $T['GR_add_script'] . ' = () => {
 					if (' . $T['GR_need_add_script'] . ') {
@@ -358,9 +363,9 @@ if (!class_exists('EasyNoCaptcha')) {
 				$result = true;
 			} else if ((isset($_REQUEST['gresponse'])) && (isset($_REQUEST['gaction']))) {
 				$gaction  = $_REQUEST['gaction'];
-				$url = "https://www.google.com/recaptcha/api/siteverify";
+				$url      = "https://www.google.com/recaptcha/api/siteverify";
 				$postdata = [
-					'secret' => $this->_ENC_setting['GoogleRecaptcha_SecretKey'],
+					'secret'   => $this->_ENC_setting['GoogleRecaptcha_SecretKey'],
 					'response' => $_REQUEST['gresponse']
 				];
 				if ($response = $this->curl($url, $postdata)) {
@@ -388,7 +393,7 @@ if (!class_exists('EasyNoCaptcha')) {
 
 		public function AddHCaptcha($key, $secret)
 		{
-			$this->_ENC_setting['hCaptcha_key'] = $key;
+			$this->_ENC_setting['hCaptcha_key']       = $key;
 			$this->_ENC_setting['hCaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
@@ -407,7 +412,7 @@ if (!class_exists('EasyNoCaptcha')) {
 			$this->addCryptWord('HC_need_add_script');
 			$this->addCryptWord('HCaptcha');
 			$this->addCryptWord('btn_submit');
-			$T = $this->_ENC_string;
+			$T      = $this->_ENC_string;
 			$result = '
 				let ' . $T['HC_need_add_script'] . '=1;
 				const ' . $T['HC_add_script'] . ' = () => {
@@ -451,9 +456,9 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (empty($this->_ENC_setting['hCaptcha_key'])) {
 				$result = true;
 			} else if (isset($_REQUEST['h-captcha-response'])) {
-				$url = "https://hcaptcha.com/siteverify";
+				$url      = "https://hcaptcha.com/siteverify";
 				$postdata = array(
-					'secret' => $this->_ENC_setting['hCaptcha_SecretKey'],
+					'secret'   => $this->_ENC_setting['hCaptcha_SecretKey'],
 					'response' => $_REQUEST['h-captcha-response']
 				);
 				if ($response = $this->curl($url, $postdata)) {
@@ -477,7 +482,7 @@ if (!class_exists('EasyNoCaptcha')) {
 		/**********************/
 		public function AddYandexSmartCaptcha($key, $secret)
 		{
-			$this->_ENC_setting['YandexSmartCaptcha_key'] = $key;
+			$this->_ENC_setting['YandexSmartCaptcha_key']       = $key;
 			$this->_ENC_setting['YandexSmartCaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
@@ -578,11 +583,11 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (empty($this->_ENC_setting['YandexSmartCaptcha_key'])) {
 				$result = true;
 			} else if (isset($_REQUEST['smart-token'])) {
-				$url = "https://smartcaptcha.yandexcloud.net/validate";
+				$url      = "https://smartcaptcha.yandexcloud.net/validate";
 				$postdata = [
 					'secret' => $this->_ENC_setting['YandexSmartCaptcha_SecretKey'],
-					'IP' => $this->curArray['IP'],
-					'token' => $_REQUEST['smart-token']
+					'IP'     => $this->curArray['IP'],
+					'token'  => $_REQUEST['smart-token']
 				];
 				if ($response = $this->curl($url, $postdata)) {
 					$arrResponse = $this->json_decode($response);
@@ -597,7 +602,7 @@ if (!class_exists('EasyNoCaptcha')) {
 						$result = true;
 					}
 				}
-			};
+			}
 			return $result;
 		}
 
@@ -617,7 +622,7 @@ if (!class_exists('EasyNoCaptcha')) {
 			$result = '';
 			foreach ($this->_ENC_shuffle as $t) {
 				if (rand(0, 100) < 50) {
-					$result .= $t;
+					$result  .= $t;
 				} else {
 					$result = $t . $result;
 				}
@@ -628,8 +633,8 @@ if (!class_exists('EasyNoCaptcha')) {
 		private function EncodeJsString($string, $level = 0)
 		{
 
-			$result = '';
-			$needEncode =  $this->_ENC_setting['encode'];
+			$result     = '';
+			$needEncode = $this->_ENC_setting['encode'];
 			if ($level >= 3) {
 				$needEncode = false;
 			}
@@ -639,38 +644,43 @@ if (!class_exists('EasyNoCaptcha')) {
 
 			while ($needEncode) {
 				$needEncode = false;
-				$i = 0;
+				$i          = 0;
 				while ($i <= strlen($string)) {
 					$char = substr($string, $i, 1);
 					if (($i > 0) and ($i < strlen($string) - 1)) {
 						if ((rand(0, 100) < 20) || ($char == '<')) {
-							$d = dechex(ord($char));
-							$c = (strlen($d) == 1) ? '0' . $d : $d;
+							$d    = dechex(ord($char));
+							$c    = (strlen($d) == 1) ? '0' . $d : $d;
 							$char = '\x' . $c;
 						} else if (rand(0, 100) < 20) {
 							$char = '"+/*' . substr(md5(uniqid()), 0, rand(1, 32)) . '*/"' . $char;
 						} else if (((rand(0, 100) < 20) && ($level < 3)) && (true)) {
 
-							$val = substr('enc' . md5(uniqid()), 0, rand(10, 32));
+							$val          = substr('enc' . md5(uniqid()), 0, rand(10, 32));
 							$functionName = substr('enc' . md5(uniqid()), 0, rand(10, 32));
 							if ((is_array($this->_ENC_AllReadyFunc)) && (count($this->_ENC_AllReadyFunc) > 0)) {
 								while (in_array($functionName, $this->_ENC_AllReadyFunc)) {
 									$functionName = substr('bf' . md5(uniqid()), 0, rand(10, 32));
-								};
-							};
+								}
+								;
+							}
+							;
 							$this->_ENC_AllReadyFunc[] = $functionName;
-							$c = rand(0, strlen($string) - 2 - $i);
+							$c                         = rand(0, strlen($string) - 2 - $i);
 							if ($c > 0) {
-								$char = substr($string, $i, $c);
-								$i += $c - 1;
-								$functiontext =  'function ' . $functionName . '(){return "' . $this->EncodeJsString($char, $level + 1) . '";};';
-								$char = '"+' . $functionName . '()+"';
+								$char          = substr($string, $i, $c);
+								$i            += $c - 1;
+								$functiontext  = 'function ' . $functionName . '(){return "' . $this->EncodeJsString($char, $level + 1) . '";};';
+								$char          = '"+' . $functionName . '()+"';
 								$this->AddToShuffle($functiontext);
-							};
-						};
-					};
+							}
+							;
+						}
+						;
+					}
+					;
 					$i++;
-					$result .= $char;
+					$result  .= $char;
 				}
 			}
 			return $result;
@@ -686,9 +696,9 @@ if (!class_exists('EasyNoCaptcha')) {
 				if ((is_array($this->_ENC_string)) && (count($this->_ENC_string) > 0)) {
 					while (in_array($val, $this->_ENC_string)) {
 						$val = substr(md5(uniqid()), 0, rand(10, 32));
-					};
-				};
-			};
+					}
+				}
+			}
 			$this->_ENC_string[$str] = $val;
 		}
 		/**********************/
@@ -710,7 +720,7 @@ if (!class_exists('EasyNoCaptcha')) {
 				return $result;
 			} else {
 				return false;
-			};
+			}
 		}
 
 		private function curl($url, $postdata = [])
@@ -740,16 +750,16 @@ if (!class_exists('EasyNoCaptcha')) {
 		{
 			if (is_array($text)) {
 				$text = "\n" . print_r($text, true);
-			};
+			}
 
-			$trace = debug_backtrace();
+			$trace     = debug_backtrace();
 			$texttrace = '';
 			if (is_array($trace)) {
-				foreach($trace as $key => $itemtrace) {
-					$class    = $itemtrace["class"];
-					$function = $itemtrace["function"];
-					$line     = $itemtrace["line"];
-					$texttrace .= $class . '->' . $function . ':' . $line . "\n";
+				foreach ($trace as $key => $itemtrace) {
+					$class       = $itemtrace["class"];
+					$function    = $itemtrace["function"];
+					$line        = $itemtrace["line"];
+					$texttrace  .= $class . '->' . $function . ':' . $line . "\n";
 					if ($key >= 3) {
 						break;
 					}
@@ -775,4 +785,4 @@ if (!class_exists('EasyNoCaptcha')) {
 			}
 		}
 	}
-};
+}
