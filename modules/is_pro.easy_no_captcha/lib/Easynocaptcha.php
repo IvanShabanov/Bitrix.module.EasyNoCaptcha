@@ -1,6 +1,5 @@
 <?php
 namespace IS_PRO\EasyNoCaptcha;
-
 if (!class_exists('EasyNoCaptcha')) {
 	class EasyNoCaptcha
 	{
@@ -10,25 +9,55 @@ if (!class_exists('EasyNoCaptcha')) {
 		private $curArray = array();
 		private $_ENC_setting = [];
 
-		function __construct(array $setting = [])
+		public static function i18($message = '', $lang = null)
+		{
+			if (empty($lang)) {
+				$lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2); //Берем первые буквы языка браузера пользователя.
+			}
+
+			$mess = [
+				'ru' => [
+					"I'm not robot" => 'Я не робот',
+					"I'm human"     => 'Я человек',
+				],
+				'en' => [
+					"I'm not robot" => "I'm not robot",
+					"I'm human"     => "I'm human",
+				]
+			];
+
+			if (empty($mess[$lang])) {
+				$lang = 'en';
+			}
+			if (empty($mess[$lang][$message])) {
+				$mess[$lang][$message] = $message;
+			}
+			return $mess[$lang][$message];
+		}
+
+		public function __construct(array $setting = [])
 		{
 			$this->_ENC_setting = [
-				'encode' => true,
-				'checkDefault' => true,
-				'checkIP' => true,
-				'ReturnPureJS' => false,
-				'GoogleReCaptcha_key' => '',
-				'GoogleRecaptcha_SecretKey' => '',
-				'hCaptcha_key' => '',
-				'hCaptcha_SecretKey' => '',
-				'YandexSmartCaptcha_key' => '',
+				'encode'                       => true,  // Обсуфикация кода
+				'checkDefault'                 => true,  // Проверять каптчу по дефолту
+				'checkIP'                      => true,  // Проверяем IP
+				'ReturnPureJS'                 => false,  // Вернуть чистый JS, без обертки в тег script
+				'GoogleReCaptcha_key'          => '',  // GoogleRecaptcha
+				'GoogleRecaptcha_SecretKey'    => '',
+				'hCaptcha_key'                 => '',  // HCaptcha
+				'hCaptcha_SecretKey'           => '',
+				'YandexSmartCaptcha_key'       => '', // YandexSmartCaptcha
 				'YandexSmartCaptcha_SecretKey' => '',
-				'script_attributes' => '',
-				'debug' => false,
-				'debug_to_file' => true,
-				'debug_to_global_array' => false,
-				'forms_selector' => 'form',
-				'InitOnJsEvent' => 'DOMContentLoaded'
+				'useAlertCaptcha'              => false, // Использовать Alert каптча
+				'AlertCaptchaText'             => "I'm human", // Текст
+				'script_attributes'            => '',  // - пока нигде не используется
+				'form_selector'                => 'form', // CSS селекторр форм
+				'enc_place'                    => '.enc_place', // CSS селектор элемента в форме куда размещать каптчу
+				'InitOnJsEvent'                => 'DOMContentLoaded', // JS event - которое запустит скрипт
+
+				'debug'                        => false, // Дебаг
+				'debug_to_file'                => true, // Записывать лог в файл
+				'debug_to_global_array'        => false, // Записывать лог в глобавльный массив
 			];
 
 			if (count($setting) > 0) {
@@ -40,9 +69,9 @@ if (!class_exists('EasyNoCaptcha')) {
 			}
 
 			$this->curArray = [
-				'DATE' => time(),
-				'IP' => $_SERVER['REMOTE_ADDR'],
-				'URL' => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+				'DATE'    => time(),
+				'IP'      => $_SERVER['REMOTE_ADDR'],
+				'URL'     => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
 				'REFERER' => $_SERVER['HTTP_REFERER']
 			];
 
@@ -66,113 +95,86 @@ if (!class_exists('EasyNoCaptcha')) {
 		/**********************/
 		/* ENC */
 		/**********************/
-		public function SetEasyNoCaptcha($_protect = 3, $_form = 'form')
+		public function SetEasyNoCaptcha($_protect = 3, $_form = null)
 		{
-			$this->_ENC_setting['form_selector'] = $_form;
+			$this->_ENC_setting['form_selector'] = !empty($_form) ? $_form : $this->_ENC_setting['form_selector'];
+			if (empty($this->_ENC_setting['form_selector'])) {
+				$this->_ENC_setting['form_selector'] = 'form';
+			}
 			$HASHCODE = substr(md5(uniqid()), 0, rand(10, 32));
-			$HASH = substr(md5(uniqid()), 0, rand(10, 32));
+			$HASH     = substr(md5(uniqid()), 0, rand(10, 32));
 			if (!$this->_ENC_setting['checkDefault']) {
 				$HASHCODE = md5('HASHCODE');
-				$HASH = md5('HASH');
-			};
-			$_SESSION['MYHASH'][$HASHCODE] = $this->curArray;
+				$HASH     = md5('HASH');
+			}
+			$_SESSION['MYHASH'][$HASHCODE]          = $this->curArray;
 			$_SESSION['MYHASH'][$HASHCODE]['VALUE'] = $HASH;
-			$_SESSION['MYHASH'][$HASHCODE]['DATE'] = date('YmdHis');
+			$_SESSION['MYHASH'][$HASHCODE]['DATE']  = date('YmdHis');
 
-			$_InitedForm =  substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
-			$_CheckedForm =  substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
-
-
-			$this->addCryptWord('HASHCODE');
-			$this->addCryptWord('HASH');
-
-			$this->addCryptWord('chechsum');
+			$_InitedForm  = substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
+			$_CheckedForm = substr(base64_encode(md5(uniqid())), 0, rand(10, 32));
 
 
-			$this->addCryptWord('ENC_check');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_check'];
-			$this->addCryptWord('ENC_InitENC');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_InitENC'];
-			$this->addCryptWord('form1');
-			$this->addCryptWord('form2');
-			$this->addCryptWord('form3');
-			$this->addCryptWord('form4');
-			$this->addCryptWord('script1');
-			$this->addCryptWord('forms1');
-			$this->addCryptWord('forms2');
-			$this->addCryptWord('forms3');
 
-			$this->addCryptWord('document1');
-			$this->addCryptWord('document2');
 
-			$this->addCryptWord('ENCMutationObserver');
-			$this->addCryptWord('event');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_check');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_InitENC');
 
 			$_ENC_script['code'] = '';
 			$_ENC_script['init'] = '';
-
-
-			$_ENC_script['code'] .= '/* '.print_r($this->_ENC_setting, true) .' */';
-
-
 			if (($this->_ENC_setting['GoogleReCaptcha_key'] != '') && ($this->_ENC_setting['GoogleRecaptcha_SecretKey'] != '')) {
 				$_ENC_script['code'] .= $this->SetGoogleReCaptcha();
 				$_ENC_script['init'] .= $this->getCryptWord('ENC_initGR') . '();';
-			};
+			}
 
 			if (($this->_ENC_setting['hCaptcha_key'] != '') && ($this->_ENC_setting['hCaptcha_SecretKey'] != '')) {
 				$_ENC_script['code'] .= $this->SetHCaptcha();
 				$_ENC_script['init'] .= $this->getCryptWord('ENC_initHC') . '();';
-			};
+			}
 
 			if (($this->_ENC_setting['YandexSmartCaptcha_key'] != '') && ($this->_ENC_setting['YandexSmartCaptcha_SecretKey'] != '')) {
 				$_ENC_script['code'] .= $this->SetYandexSmartCaptcha();
 				$_ENC_script['init'] .= $this->getCryptWord('ENC_initYSC') . '();';
-			};
-
-
-
-			$T = $this->_ENC_string;
-
+			}
 
 			$result = '
-				document["addEventListener"]("'.$this->_ENC_setting['InitOnJsEvent'].'", function(event) {
-					const ' . $T['document2'] . ' = document;
-					let ' . $T['chechsum'] . ' = 0;
+				document["addEventListener"]("' . $this->_ENC_setting['InitOnJsEvent'] . '", function(event) {
+					const ' . $this->T('document2') . ' = document;
+					let ' . $this->T('chechsum') . ' = 0;
 
-					const ' . $T['ENC_check'] . ' = () => {
-						' . $T['chechsum'] . ' ++;
-						if (' . $T['chechsum'] . ' > ' . $_protect . ') {
-							const ' . $T['forms2'] . ' = ' . $T['document2'] . '["querySelectorAll"]( ".' . $_InitedForm . ':not(.' . $_CheckedForm . ')" );
-							' . $T['forms2'] . '["forEach"](function(' . $T['form3'] . ') {
-								let ' . $T['HASHCODE'] . ' = ' . $T['document2'] . '["createElement"]("input");
-								let ' . $T['HASH'] . ' = ' . $T['document2'] . '["createElement"]("input");
-								' . $T['HASHCODE'] . '["type"] = "hidden";
-								' . $T['HASHCODE'] . '["name"] = "HASHCODE";
-								' . $T['HASHCODE'] . '["value"] = "' . $HASHCODE . '";
-								' . $T['HASH'] . '["type"] = "hidden";
-								' . $T['HASH'] . '["name"] = "HASH";
-								' . $T['HASH'] . '["value"] = "' . $HASH . '";
-								' . $T['form3'] . '["appendChild"](' . $T['HASHCODE'] . ');
-								' . $T['form3'] . '["appendChild"](' . $T['HASH'] . ');
-								' . $T['form3'] . '["classList"]["add"]("' . $_CheckedForm . '");
+					const ' . $this->T('ENC_check') . ' = () => {
+						' . $this->T('chechsum') . ' ++;
+						if (' . $this->T('chechsum') . ' > ' . $_protect . ') {
+							const ' . $this->T('forms2') . ' = ' . $this->T('document2') . '["querySelectorAll"]( ".' . $_InitedForm . ':not(.' . $_CheckedForm . ')" );
+							' . $this->T('forms2') . '["forEach"](function(' . $this->T('form3') . ') {
+								let ' . $this->T('HASHCODE') . ' = ' . $this->T('document2') . '["createElement"]("input");
+								let ' . $this->T('HASH') . ' = ' . $this->T('document2') . '["createElement"]("input");
+								' . $this->T('HASHCODE') . '["type"] = "hidden";
+								' . $this->T('HASHCODE') . '["name"] = "HASHCODE";
+								' . $this->T('HASHCODE') . '["value"] = "' . $HASHCODE . '";
+								' . $this->T('HASH') . '["type"] = "hidden";
+								' . $this->T('HASH') . '["name"] = "HASH";
+								' . $this->T('HASH') . '["value"] = "' . $HASH . '";
+								' . $this->T('form3') . '["appendChild"](' . $this->T('HASHCODE') . ');
+								' . $this->T('form3') . '["appendChild"](' . $this->T('HASH') . ');
+								' . $this->T('form3') . '["classList"]["add"]("' . $_CheckedForm . '");
 							});
 						};
 					};
-					const ' . $T['ENC_InitENC'] . ' = () => {
-						const ' . $T['forms3'] . ' =  ' . $T['document2'] . '["querySelectorAll"]("' . $_form . '");
-						' . $T['forms3'] . '["forEach"](function(' . $T['form4'] . ') {
-							if (!' . $T['form4'] . '["classList"]["contains"]("' . $_InitedForm . '")) {
-								' . $T['form4'] . '["classList"]["add"]("' . $_InitedForm . '");
-								' . $T['form4'] . '["addEventListener"]("click", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("keydown", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("keyup", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("touchstart", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("touchmove", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("touchend", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("mouseenter", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("keyup", ' . $T['ENC_check'] . ', false);
-								' . $T['form4'] . '["addEventListener"]("mouseleave", ' . $T['ENC_check'] . ', false);
+					const ' . $this->T('ENC_InitENC') . ' = () => {
+						const ' . $this->T('forms3') . ' =  ' . $this->T('document2') . '["querySelectorAll"]("' . $_form . '");
+						' . $this->T('forms3') . '["forEach"](function(' . $this->T('form4') . ') {
+							if (!' . $this->T('form4') . '["classList"]["contains"]("' . $_InitedForm . '")) {
+								' . $this->T('form4') . '["classList"]["add"]("' . $_InitedForm . '");
+								' . $this->T('form4') . '["addEventListener"]("click", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("keydown", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("keyup", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("touchstart", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("touchmove", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("touchend", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("mouseenter", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("keyup", ' . $this->T('ENC_check') . ', false);
+								' . $this->T('form4') . '["addEventListener"]("mouseleave", ' . $this->T('ENC_check') . ', false);
 							};
 						});
 						' .
@@ -183,10 +185,10 @@ if (!class_exists('EasyNoCaptcha')) {
 				$_ENC_script['code'] .
 				'
 					setTimeout(function() {
-						' . $T['ENC_InitENC'] . '();
+						' . $this->T('ENC_InitENC') . '();
 						const MutationObserver	= window.MutationObserver;
-						const ' . $T['ENCMutationObserver'] . ' = new MutationObserver(' . $T['ENC_InitENC'] . ');
-						' . $T['ENCMutationObserver'] . '["observe"](' . $T['document2'] . '["querySelectorAll"]("body")[0],{childList:true,subtree:true});
+						const ' . $this->T('ENCMutationObserver') . ' = new MutationObserver(' . $this->T('ENC_InitENC') . ');
+						' . $this->T('ENCMutationObserver') . '["observe"](' . $this->T('document2') . '["querySelectorAll"]("body")[0],{childList:true,subtree:true});
 
 					}, 1000);
 
@@ -197,8 +199,7 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (is_array($matches)) {
 				if (is_array($matches[0])) {
 					foreach ($matches[0] as $string) {
-
-						$result = $this->str_replace_once($string, $this->EncodeJsString($string), $result, 1);
+						$result = $this->str_replace_once($string, $this->EncodeJsString($string), $result);
 					}
 				}
 			}
@@ -211,8 +212,8 @@ if (!class_exists('EasyNoCaptcha')) {
 					$result = '';
 					foreach ($arResult as $r) {
 						$result .= trim($r);
-					};
-				};
+					}
+				}
 			}
 
 			if (!$this->_ENC_setting['ReturnPureJS']) {
@@ -238,7 +239,7 @@ if (!class_exists('EasyNoCaptcha')) {
 						$this->CheckYandexSmartCaptcha()
 					);
 				unset($_SESSION['MYHASH'][$_REQUEST['HASHCODE']]);
-			};
+			}
 			return $result;
 		}
 		/**********************/
@@ -267,8 +268,8 @@ if (!class_exists('EasyNoCaptcha')) {
 				if ($this->curArray['IP'] != $session['IP']) {
 					/* IP не совпадают */
 					$result = false;
-				};
-			};
+				}
+			}
 			return $result;
 		}
 
@@ -278,69 +279,58 @@ if (!class_exists('EasyNoCaptcha')) {
 
 		public function AddGoogleRecaptcha($key, $secret)
 		{
-			$this->_ENC_setting['GoogleReCaptcha_key'] = $key;
+			$this->_ENC_setting['GoogleReCaptcha_key']       = $key;
 			$this->_ENC_setting['GoogleRecaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
 		private function SetGoogleReCaptcha()
 		{
-			$_form = $this->_ENC_setting['form_selector'];
-			$this->addCryptWord('ENC_initGR');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_initGR'];
-			$this->addCryptWord('ENC_GR_Set');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_GR_Set'];
+			$_form                     = $this->_ENC_setting['form_selector'];
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_initGR');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_GR_Set');
 
-			$this->addCryptWord('GR');
-			$this->addCryptWord('GR_action');
-			$this->addCryptWord('GR_checked');
-			$this->addCryptWord('GR_add_script');
-			$this->addCryptWord('GR_need_add_script');
-			$this->addCryptWord('grecaptcha');
-			$this->addCryptWord('GoogleRecaptcha_Action');
-
-			$T = $this->_ENC_string;
-			$GoogleRecaptcha_Action =  $T['GoogleRecaptcha_Action'];
-			$result = '
-				let ' . $T['GR_need_add_script'] . '=1;
-				const ' . $T['GR_add_script'] . ' = () => {
-					if (' . $T['GR_need_add_script'] . ') {
-						let ' . $T['document1'] . ' = document;
-						let ' . $T['script1'] . ' = ' . $T['document1'] . '["createElement"]("script");
-						' . $T['script1'] . '["type"] = \'text/javascript\';
-						' . $T['script1'] . '["src"] = \'https://www.google.com/recaptcha/api.js?render=' . $this->_ENC_setting['GoogleReCaptcha_key'] . '\';
-						' . $T['document1'] . '["getElementsByTagName"]("head")[0].appendChild(' . $T['script1'] . ');
-						' . $T['GR_need_add_script'] . '=0;
+			$GoogleRecaptcha_Action = $this->T('GoogleRecaptcha_Action');
+			$result                 = '
+				let ' . $this->T('GR_need_add_script') . '=1;
+				const ' . $this->T('GR_add_script') . ' = () => {
+					if (' . $this->T('GR_need_add_script') . ') {
+						let ' . $this->T('document1') . ' = document;
+						let ' . $this->T('script1') . ' = ' . $this->T('document1') . '["createElement"]("script");
+						' . $this->T('script1') . '["type"] = \'text/javascript\';
+						' . $this->T('script1') . '["src"] = \'https://www.google.com/recaptcha/api.js?render=' . $this->_ENC_setting['GoogleReCaptcha_key'] . '\';
+						' . $this->T('document1') . '["getElementsByTagName"]("head")[0].appendChild(' . $this->T('script1') . ');
+						' . $this->T('GR_need_add_script') . '=0;
 					};
 				};
-				const ' . $T['ENC_initGR'] . ' = () => {
-					let ' . $T['document1'] . ' = document;
-					' . $T['GR_add_script'] . '();
-					const ' . $T['forms1'] . ' = ' . $T['document1'] . '["querySelectorAll"]( "' . $_form . ':not(.' . $T['GR_checked'] . ')" );
+				const ' . $this->T('ENC_initGR') . ' = () => {
+					let ' . $this->T('document1') . ' = document;
+					' . $this->T('GR_add_script') . '();
+					const ' . $this->T('forms1') . ' = ' . $this->T('document1') . '["querySelectorAll"]( "' . $_form . ':not(.' . $this->T('GR_checked') . ')" );
 					setTimeout(function() {
-						' . $T['forms1'] . '["forEach"](function(' . $T['form2'] . ') {
-							' . $T['ENC_GR_Set'] . '(' . $T['form2'] . ');
-							' . $T['form2'] . '["classList"]["add"]("' . $T['GR_checked'] . '");
+						' . $this->T('forms1') . '["forEach"](function(' . $this->T('form2') . ') {
+							' . $this->T('ENC_GR_Set') . '(' . $this->T('form2') . ');
+							' . $this->T('form2') . '["classList"]["add"]("' . $this->T('GR_checked') . '");
 						});
 					}, 1000);
 				};
-				const ' . $T['ENC_GR_Set'] . ' = (' . $T['form1'] . ') => {
-					if (!' . $T['form1'] . '["classList"]["contains"]("' . $T['GR_checked'] . '")) {
-						' . $T['form1'] . '["classList"]["add"]("' . $T['GR_checked'] . '");
-						let ' . $T['grecaptcha'] . ' = grecaptcha;
-						' . $T['grecaptcha'] . '["ready"](function() {
-							' . $T['grecaptcha'] . '["execute"]("' . $this->_ENC_setting['GoogleReCaptcha_key'] . '", {action: "' . $GoogleRecaptcha_Action . '"})
+				const ' . $this->T('ENC_GR_Set') . ' = (' . $this->T('form1') . ') => {
+					if (!' . $this->T('form1') . '["classList"]["contains"]("' . $this->T('GR_checked') . '")) {
+						' . $this->T('form1') . '["classList"]["add"]("' . $this->T('GR_checked') . '");
+						let ' . $this->T('grecaptcha') . ' = grecaptcha;
+						' . $this->T('grecaptcha') . '["ready"](function() {
+							' . $this->T('grecaptcha') . '["execute"]("' . $this->_ENC_setting['GoogleReCaptcha_key'] . '", {action: "' . $GoogleRecaptcha_Action . '"})
 							.then(function(token) {
 								let d = document;
-								let ' . $T['GR'] . ' = d["createElement"]("input");
-								let ' . $T['GR_action'] . ' = d["createElement"]("input");
-								' . $T['GR'] . '["type"] = "hidden";
-								' . $T['GR'] . '["name"] = "gresponse";
-								' . $T['GR'] . '["value"] = token;
-								' . $T['GR_action'] . '["type"] = "hidden";
-								' . $T['GR_action'] . '["name"] = "gaction";
-								' . $T['GR_action'] . '["value"] = "' . $GoogleRecaptcha_Action . '";
-								' . $T['form1'] . '["appendChild"](' . $T['GR'] . ');
-								' . $T['form1'] . '["appendChild"](' . $T['GR_action'] . ');
+								let ' . $this->T('GR') . ' = d["createElement"]("input");
+								let ' . $this->T('GR_action') . ' = d["createElement"]("input");
+								' . $this->T('GR') . '["type"] = "hidden";
+								' . $this->T('GR') . '["name"] = "gresponse";
+								' . $this->T('GR') . '["value"] = token;
+								' . $this->T('GR_action') . '["type"] = "hidden";
+								' . $this->T('GR_action') . '["name"] = "gaction";
+								' . $this->T('GR_action') . '["value"] = "' . $GoogleRecaptcha_Action . '";
+								' . $this->T('form1') . '["appendChild"](' . $this->T('GR') . ');
+								' . $this->T('form1') . '["appendChild"](' . $this->T('GR_action') . ');
 							});;
 						});
 					};
@@ -358,9 +348,9 @@ if (!class_exists('EasyNoCaptcha')) {
 				$result = true;
 			} else if ((isset($_REQUEST['gresponse'])) && (isset($_REQUEST['gaction']))) {
 				$gaction  = $_REQUEST['gaction'];
-				$url = "https://www.google.com/recaptcha/api/siteverify";
+				$url      = "https://www.google.com/recaptcha/api/siteverify";
 				$postdata = [
-					'secret' => $this->_ENC_setting['GoogleRecaptcha_SecretKey'],
+					'secret'   => $this->_ENC_setting['GoogleRecaptcha_SecretKey'],
 					'response' => $_REQUEST['gresponse']
 				];
 				if ($response = $this->curl($url, $postdata)) {
@@ -388,57 +378,48 @@ if (!class_exists('EasyNoCaptcha')) {
 
 		public function AddHCaptcha($key, $secret)
 		{
-			$this->_ENC_setting['hCaptcha_key'] = $key;
+			$this->_ENC_setting['hCaptcha_key']       = $key;
 			$this->_ENC_setting['hCaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
 		private function SetHCaptcha()
 		{
-			$_form = $this->_ENC_setting['form_selector'];
-			$this->addCryptWord('ENC_initHC');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_initHC'];
-			$this->addCryptWord('ENC_HC_Set');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_HC_Set'];
+			$_form                     = $this->_ENC_setting['form_selector'];
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_initHC');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_HC_Set');
 
-			$this->addCryptWord('HC');
-			$this->addCryptWord('HC_action');
-			$this->addCryptWord('HC_checked');
-			$this->addCryptWord('HC_add_script');
-			$this->addCryptWord('HC_need_add_script');
-			$this->addCryptWord('HCaptcha');
-			$this->addCryptWord('btn_submit');
-			$T = $this->_ENC_string;
 			$result = '
-				let ' . $T['HC_need_add_script'] . '=1;
-				const ' . $T['HC_add_script'] . ' = () => {
-					if (' . $T['HC_need_add_script'] . ') {
-						let ' . $T['document1'] . ' = document;
-						let ' . $T['script1'] . ' = ' . $T['document1'] . '["createElement"]("script");
-						' . $T['script1'] . '["type"] = \'text/javascript\';
-						' . $T['script1'] . '["src"] = \'https://www.hCaptcha.com/1/api.js' . $this->_ENC_setting['GoogleReCaptcha_key'] . '\';
-						' . $T['document1'] . '["getElementsByTagName"]("head")[0].appendChild(' . $T['script1'] . ');
-						' . $T['HC_need_add_script'] . '=0;
+				let ' . $this->T('HC_need_add_script') . '=1;
+				const ' . $this->T('HC_add_script') . ' = () => {
+					if (' . $this->T('HC_need_add_script') . ') {
+						let ' . $this->T('document1') . ' = document;
+						let ' . $this->T('script1') . ' = ' . $this->T('document1') . '["createElement"]("script");
+						' . $this->T('script1') . '["type"] = \'text/javascript\';
+						' . $this->T('script1') . '["src"] = \'https://www.hCaptcha.com/1/api.js' . $this->_ENC_setting['GoogleReCaptcha_key'] . '\';
+						' . $this->T('document1') . '["getElementsByTagName"]("head")[0].appendChild(' . $this->T('script1') . ');
+						' . $this->T('HC_need_add_script') . '=0;
 					};
 				};
-				const ' . $T['ENC_initHC'] . ' = () => {
-					const ' . $T['document1'] . ' = document;
+				const ' . $this->T('ENC_initHC') . ' = () => {
+					const ' . $this->T('document1') . ' = document;
 
-					const ' . $T['forms1'] . ' = ' . $T['document1'] . '["querySelectorAll"]( "' . $_form . ':not(.' . $T['HC_checked'] . ')" );
+					const ' . $this->T('forms1') . ' = ' . $this->T('document1') . '["querySelectorAll"]( "' . $_form . ':not(.' . $this->T('HC_checked') . ')" );
 
-					' . $T['forms1'] . '["forEach"](function(' . $T['form2'] . ') {
-						' . $T['ENC_HC_Set'] . '(' . $T['form2'] . ');
-						' . $T['form2'] . '["classList"]["add"]("' . $T['HC_checked'] . '");
+					' . $this->T('forms1') . '["forEach"](function(' . $this->T('form2') . ') {
+						' . $this->T('ENC_HC_Set') . '(' . $this->T('form2') . ');
+						' . $this->T('form2') . '["classList"]["add"]("' . $this->T('HC_checked') . '");
 					});
-					' . $T['HC_add_script'] . '();
+					' . $this->T('HC_add_script') . '();
 				};
-				const ' . $T['ENC_HC_Set'] . ' = (' . $T['form1'] . ') => {
-					if (!' . $T['form1'] . '["classList"]["contains"]("' . $T['HC_checked'] . '")) {
-						' . $T['form1'] . '["classList"]["add"]("' . $T['HC_checked'] . '");
+				const ' . $this->T('ENC_HC_Set') . ' = (' . $this->T('form1') . ') => {
+					if (!' . $this->T('form1') . '["classList"]["contains"]("' . $this->T('HC_checked') . '")) {
+						' . $this->T('form1') . '["classList"]["add"]("' . $this->T('HC_checked') . '");
 						let d = document;
-						let ' . $T['HC'] . ' = d["createElement"]("div");
-						' . $T['HC'] . '["setAttribute"]("class", "h-captcha");
-						' . $T['HC'] . '["setAttribute"]("data-sitekey", "' . $this->_ENC_setting['hCaptcha_key'] . '");
-						' . $T['form1'] . '["appendChild"](' . $T['HC'] . ');
+						let ' . $this->T('enc_place') . ' = ' . $this->T('form1') . '["querySelector"]("' . $this->_ENC_setting['enc_place'] . '") ?? ' . $this->T('form1') . ';
+						let ' . $this->T('HC') . ' = d["createElement"]("div");
+						' . $this->T('HC') . '["setAttribute"]("class", "h-captcha");
+						' . $this->T('HC') . '["setAttribute"]("data-sitekey", "' . $this->_ENC_setting['hCaptcha_key'] . '");
+						' . $this->T('enc_place') . '["appendChild"](' . $this->T('HC') . ');
 					};
 				};
 			';
@@ -451,9 +432,9 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (empty($this->_ENC_setting['hCaptcha_key'])) {
 				$result = true;
 			} else if (isset($_REQUEST['h-captcha-response'])) {
-				$url = "https://hcaptcha.com/siteverify";
+				$url      = "https://hcaptcha.com/siteverify";
 				$postdata = array(
-					'secret' => $this->_ENC_setting['hCaptcha_SecretKey'],
+					'secret'   => $this->_ENC_setting['hCaptcha_SecretKey'],
 					'response' => $_REQUEST['h-captcha-response']
 				);
 				if ($response = $this->curl($url, $postdata)) {
@@ -477,77 +458,62 @@ if (!class_exists('EasyNoCaptcha')) {
 		/**********************/
 		public function AddYandexSmartCaptcha($key, $secret)
 		{
-			$this->_ENC_setting['YandexSmartCaptcha_key'] = $key;
+			$this->_ENC_setting['YandexSmartCaptcha_key']       = $key;
 			$this->_ENC_setting['YandexSmartCaptcha_SecretKey'] = $secret;
 		}
 		/**********************/
 		private function SetYandexSmartCaptcha()
 		{
 			$_form = $this->_ENC_setting['form_selector'];
-			$this->addCryptWord('ENC_initYSC');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_initYSC'];
-			$this->addCryptWord('ENC_YSC_Set');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_YSC_Set'];
-			$this->addCryptWord('ENC_onloadYSC');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_onloadYSC'];
+
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_initYSC');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_YSC_Set');
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_onloadYSC');
 
 			$this->addCryptWord('ENC_callbackYSC');
-			$this->_ENC_AllReadyFunc[] = $this->_ENC_string['ENC_callbackYSC'];
-
-
-			$this->addCryptWord('YSC');
-			$this->addCryptWord('YSC_action');
-			$this->addCryptWord('YSC_checked');
-			$this->addCryptWord('YSC_add_script');
-			$this->addCryptWord('YSC_need_add_script');
-			$this->addCryptWord('YSCaptcha');
-
-			$T = $this->_ENC_string;
+			$this->_ENC_AllReadyFunc[] = $this->T('ENC_callbackYSC');
 
 			$result = '
-				let ' . $T['YSC_need_add_script'] . '=1;
-				const ' . $T['YSC_add_script'] . ' = () => {
-					if (' . $T['YSC_need_add_script'] . ') {
-						let ' . $T['document1'] . ' = document;
-						let ' . $T['script1'] . ' = ' . $T['document1'] . '["createElement"]("script");
-						' . $T['script1'] . '["type"] = \'text/javascript\';
-						' . $T['script1'] . '["src"] = \'https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=' . $T['ENC_onloadYSC'] . '\';
-						' . $T['document1'] . '["getElementsByTagName"]("head")[0].appendChild(' . $T['script1'] . ');
-						' . $T['YSC_need_add_script'] . '=0;
+				let ' . $this->T('YSC_need_add_script') . '=1;
+				const ' . $this->T('YSC_add_script') . ' = () => {
+					if (' . $this->T('YSC_need_add_script') . ') {
+						let ' . $this->T('document1') . ' = document;
+						let ' . $this->T('script1') . ' = ' . $this->T('document1') . '["createElement"]("script");
+						' . $this->T('script1') . '["type"] = \'text/javascript\';
+						' . $this->T('script1') . '["src"] = \'https://captcha-api.yandex.ru/captcha.js?render=onload&onload=' . $this->T('ENC_onloadYSC') . '\';
+						' . $this->T('document1') . '["getElementsByTagName"]("head")[0].appendChild(' . $this->T('script1') . ');
+						' . $this->T('YSC_need_add_script') . '=0;
 					};
 				};
-				const ' . $T['ENC_initYSC'] . ' = () => {
-					let ' . $T['document1'] . ' = document;
-					' . $T['YSC_add_script'] . '();
-					const ' . $T['forms1'] . ' = ' . $T['document1'] . '["querySelectorAll"]( "' . $_form . ':not(.' . $T['YSC_checked'] . ')" );
+				const ' . $this->T('ENC_initYSC') . ' = () => {
+					let ' . $this->T('document1') . ' = document;
+					' . $this->T('YSC_add_script') . '();
+					const ' . $this->T('forms1') . ' = ' . $this->T('document1') . '["querySelectorAll"]( "' . $_form . ':not(.' . $this->T('YSC_checked') . ')" );
 					setTimeout(function() {
-						' . $T['forms1'] . '["forEach"](function(' . $T['form2'] . ') {
-							' . $T['ENC_YSC_Set'] . '(' . $T['form2'] . ');
-							' . $T['form2'] . '["classList"]["add"]("' . $T['YSC_checked'] . '");
+						' . $this->T('forms1') . '["forEach"](function(' . $this->T('form2') . ') {
+							' . $this->T('ENC_YSC_Set') . '(' . $this->T('form2') . ');
+							' . $this->T('form2') . '["classList"]["add"]("' . $this->T('YSC_checked') . '");
 						});
-						' . $T['ENC_onloadYSC'] . '();
+						' . $this->T('ENC_onloadYSC') . '();
 					}, 1000);
 				};
-				const ' . $T['ENC_YSC_Set'] . ' = (' . $T['form1'] . ') => {
-					if (!' . $T['form1'] . '["classList"]["contains"]("' . $T['YSC_checked'] . '")) {
-						' . $T['form1'] . '["classList"]["add"]("' . $T['YSC_checked'] . '");
+				const ' . $this->T('ENC_YSC_Set') . ' = (' . $this->T('form1') . ') => {
+					if (!' . $this->T('form1') . '["classList"]["contains"]("' . $this->T('YSC_checked') . '")) {
+						' . $this->T('form1') . '["classList"]["add"]("' . $this->T('YSC_checked') . '");
 						let dy = document;
-						let ' . $T['YSC'] . ' = dy["createElement"]("div");
-						' . $T['YSC'] . '["setAttribute"]("class", "smart-captcha");
-						' . $T['YSC'] . '["setAttribute"]("style", "max-width: 300px; margin: 7px;");
-						let subm = ' . $T['form1'] . '.querySelector("*[type=submit]");
-						if (subm) {
-							subm.insertAdjacentElement("beforebegin", ' . $T['YSC'] . ');
-						} else {
-							' . $T['form1'] . '["appendChild"](' . $T['YSC'] . ');
-						};
+						let ' . $this->T('enc_place') . ' = ' . $this->T('form1') . '["querySelector"]("' . $this->_ENC_setting['enc_place'] . '") ?? ' . $this->T('form1') . ';
+						let ' . $this->T('YSC') . ' = dy["createElement"]("div");
+						' . $this->T('YSC') . '["setAttribute"]("class", "smart-captcha");
+						' . $this->T('YSC') . '["setAttribute"]("style", "max-width: 300px");
+						' . $this->T('enc_place') . '["appendChild"](' . $this->T('YSC') . ');
+
 					};
 				};
-				const ' . $T['ENC_onloadYSC'] . ' = () => {
+				const ' . $this->T('ENC_onloadYSC') . ' = () => {
 					let dyYsc = document;
 					if (!window.smartCaptcha) {
 						return;
-					};
+					}
 					let containers = dyYsc["querySelectorAll"](".smart-captcha:not(.rendered)");
 					if (containers.length > 0) {
 						containers.forEach((cont) => {
@@ -557,13 +523,13 @@ if (!class_exists('EasyNoCaptcha')) {
 									sitekey: "' . $this->_ENC_setting['YandexSmartCaptcha_key'] . '",
 									invisible: false,
 									shieldPosition: "top-left",
-									callback: ' . $T['ENC_callbackYSC'] . ',
+									callback: ' . $this->T('ENC_callbackYSC') . ',
 								});
-							};
+							}
 						});
-					};
+					}
 				};
-				const ' . $T['ENC_callbackYSC'] . ' = (token) => {
+				const ' . $this->T('ENC_callbackYSC') . ' = (token) => {
 					window.smartCaptcha.execute();
 				};
 			';
@@ -578,16 +544,15 @@ if (!class_exists('EasyNoCaptcha')) {
 			if (empty($this->_ENC_setting['YandexSmartCaptcha_key'])) {
 				$result = true;
 			} else if (isset($_REQUEST['smart-token'])) {
-				$url = "https://smartcaptcha.yandexcloud.net/validate";
+				$url      = "https://captcha-api.yandex.ru/validate";
 				$postdata = [
 					'secret' => $this->_ENC_setting['YandexSmartCaptcha_SecretKey'],
-					'IP' => $this->curArray['IP'],
-					'token' => $_REQUEST['smart-token']
+					'IP'     => $this->curArray['IP'],
+					'token'  => $_REQUEST['smart-token']
 				];
 				if ($response = $this->curl($url, $postdata)) {
 					$arrResponse = $this->json_decode($response);
 					if ($this->_ENC_setting['debug']) {
-						$this->log($postdata);
 						$this->log($arrResponse);
 					}
 					if (
@@ -597,10 +562,29 @@ if (!class_exists('EasyNoCaptcha')) {
 						$result = true;
 					}
 				}
-			};
+			}
 			return $result;
 		}
 
+
+		private function SetAlertCaptcha()
+		{
+
+			$result = '
+					function ' . $this->T('checkFunction') . '(funcName) {
+						const ' . $this->T('iframe') . ' = document["createElement"]("iframe");
+						' . $this->T('iframe') . '.style.display = "none";
+						document.body.appendChild(' . $this->T('iframe') . ');
+						const ' . $this->T('cleanFunc') . ' = ' . $this->T('iframe') . '.contentWindow[funcName];
+						const ' . $this->T('currentFunc') . ' = window[funcName];
+						const ' . $this->T('isOverwritten') . ' = ' . $this->T('currentFunc') . '.toString() !== ' . $this->T('cleanFunc') . '.toString();
+						document.body.removeChild(' . $this->T('iframe') . ');
+						return ' . $this->T('isOverwritten') . ';
+					}
+					const ' . $this->T('SetConfirmCaptcha') . ' = () => {};
+			';
+			return $result;
+		}
 
 
 		/**********************/
@@ -628,8 +612,8 @@ if (!class_exists('EasyNoCaptcha')) {
 		private function EncodeJsString($string, $level = 0)
 		{
 
-			$result = '';
-			$needEncode =  $this->_ENC_setting['encode'];
+			$result     = '';
+			$needEncode = $this->_ENC_setting['encode'];
 			if ($level >= 3) {
 				$needEncode = false;
 			}
@@ -639,36 +623,36 @@ if (!class_exists('EasyNoCaptcha')) {
 
 			while ($needEncode) {
 				$needEncode = false;
-				$i = 0;
+				$i          = 0;
 				while ($i <= strlen($string)) {
 					$char = substr($string, $i, 1);
 					if (($i > 0) and ($i < strlen($string) - 1)) {
 						if ((rand(0, 100) < 20) || ($char == '<')) {
-							$d = dechex(ord($char));
-							$c = (strlen($d) == 1) ? '0' . $d : $d;
+							$d    = dechex(ord($char));
+							$c    = (strlen($d) == 1) ? '0' . $d : $d;
 							$char = '\x' . $c;
 						} else if (rand(0, 100) < 20) {
 							$char = '"+/*' . substr(md5(uniqid()), 0, rand(1, 32)) . '*/"' . $char;
 						} else if (((rand(0, 100) < 20) && ($level < 3)) && (true)) {
 
-							$val = substr('enc' . md5(uniqid()), 0, rand(10, 32));
+							$val          = substr('enc' . md5(uniqid()), 0, rand(10, 32));
 							$functionName = substr('enc' . md5(uniqid()), 0, rand(10, 32));
 							if ((is_array($this->_ENC_AllReadyFunc)) && (count($this->_ENC_AllReadyFunc) > 0)) {
 								while (in_array($functionName, $this->_ENC_AllReadyFunc)) {
 									$functionName = substr('bf' . md5(uniqid()), 0, rand(10, 32));
-								};
-							};
+								}
+							}
 							$this->_ENC_AllReadyFunc[] = $functionName;
-							$c = rand(0, strlen($string) - 2 - $i);
+							$c                         = rand(0, strlen($string) - 2 - $i);
 							if ($c > 0) {
-								$char = substr($string, $i, $c);
-								$i += $c - 1;
-								$functiontext =  'function ' . $functionName . '(){return "' . $this->EncodeJsString($char, $level + 1) . '";};';
-								$char = '"+' . $functionName . '()+"';
+								$char          = substr($string, $i, $c);
+								$i            += $c - 1;
+								$functiontext  = 'function ' . $functionName . '(){return "' . $this->EncodeJsString($char, $level + 1) . '";};';
+								$char          = '"+' . $functionName . '()+"';
 								$this->AddToShuffle($functiontext);
-							};
-						};
-					};
+							}
+						}
+					}
 					$i++;
 					$result .= $char;
 				}
@@ -681,19 +665,29 @@ if (!class_exists('EasyNoCaptcha')) {
 		private function addCryptWord($str)
 		{
 			$val = $str;
+			if (!empty($this->_ENC_string[$str])) {
+				return;
+			}
 			if ($this->_ENC_setting['encode']) {
 				$val = 't' . substr(md5(uniqid()), 0, rand(10, 32));
 				if ((is_array($this->_ENC_string)) && (count($this->_ENC_string) > 0)) {
 					while (in_array($val, $this->_ENC_string)) {
 						$val = substr(md5(uniqid()), 0, rand(10, 32));
-					};
-				};
-			};
+					}
+				}
+			}
 			$this->_ENC_string[$str] = $val;
 		}
 		/**********************/
+		private function T($str)
+		{
+			return $this->getCryptWord($str);
+		}
 		private function getCryptWord($str)
 		{
+			if (empty($this->_ENC_string[$str])) {
+				$this->addCryptWord($str);
+			}
 			return $this->_ENC_string[$str];
 		}
 		/**********************/
@@ -710,7 +704,7 @@ if (!class_exists('EasyNoCaptcha')) {
 				return $result;
 			} else {
 				return false;
-			};
+			}
 		}
 
 		private function curl($url, $postdata = [])
@@ -726,7 +720,6 @@ if (!class_exists('EasyNoCaptcha')) {
 
 			if ($this->_ENC_setting['debug']) {
 				$this->log($url . "\t" . $httpcode);
-				$this->log($postdata);
 				$this->log($response);
 			}
 
@@ -740,26 +733,17 @@ if (!class_exists('EasyNoCaptcha')) {
 		{
 			if (is_array($text)) {
 				$text = "\n" . print_r($text, true);
-			};
-
-			$trace = debug_backtrace();
-			$texttrace = '';
-			if (is_array($trace)) {
-				foreach($trace as $key => $itemtrace) {
-					$class    = $itemtrace["class"];
-					$function = $itemtrace["function"];
-					$line     = $itemtrace["line"];
-					$texttrace .= $class . '->' . $function . ':' . $line . "\n";
-					if ($key >= 3) {
-						break;
-					}
-				}
 			}
+
+			$trace    = debug_backtrace();
+			$class    = $trace[0]["class"];
+			$function = $trace[0]["function"];
+			$line     = $trace[0]["line"];
 
 			$text =
 				date('Y.m.d H:i:s') .
-				"\n" .
-				$texttrace
+				"\t" .
+				$class . '->' . $function . ':' . $line . "\n"
 				. $text . "\n";
 
 			if ($this->_ENC_setting['debug_to_file']) {
@@ -775,4 +759,4 @@ if (!class_exists('EasyNoCaptcha')) {
 			}
 		}
 	}
-};
+}

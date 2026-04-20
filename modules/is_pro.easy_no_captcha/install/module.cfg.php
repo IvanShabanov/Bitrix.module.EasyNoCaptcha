@@ -1,4 +1,4 @@
-<?
+<?php
 $arModuleCfg = [
 	'MODULE_ID' => 'is_pro.easy_no_captcha',
 	'options_list' => [
@@ -65,6 +65,11 @@ $arModuleCfg = [
 		'FORM_SELECTOR' => [
 			'type' => 'text',
 			'default' => 'form'
+		],
+
+		'ENC_SELECTOR' => [
+			'type' => 'text',
+			'default' => '.enc_place'
 		],
 
 		'SORT' => [

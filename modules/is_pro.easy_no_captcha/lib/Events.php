@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace IS_PRO\EasyNoCaptcha;
 
@@ -10,7 +10,7 @@ class Events
 		if ($option['MODULE_MODE'] != 'on') {
 			return true;
 		}
-		$result  = Common::CheckCaptcha();
+		$result = Common::CheckCaptcha();
 		return $result;
 	}
 
@@ -27,7 +27,7 @@ class Events
 			return true;
 		}
 
-		\Bitrix\Main\Page\Asset::getInstance()->addString('<script defer data-id="ENC" data-skip-moving="true" src="'.$option['URL_PATH'].'/script.php"></script>');
+		\Bitrix\Main\Page\Asset::getInstance()->addString('<script defer data-id="ENC" data-skip-moving="true" src="' . $option['URL_PATH'] . '/script.php"></script>');
 
 
 		$eventManager = \Bitrix\Main\EventManager::getInstance();
@@ -47,7 +47,7 @@ class Events
 		];
 
 
-		$arCustomEvents = explode("\n",	$option['EVENTS']);
+		$arCustomEvents = explode("\n", $option['EVENTS']);
 
 		$arEvents = array_merge($arEvents, $arCustomEvents);
 
@@ -61,11 +61,11 @@ class Events
 			$event = trim($event);
 			if ($event == '') {
 				continue;
-			};
+			}
 
 			if (mb_strpos($event, ':') !== false) {
 				[$module, $event] = explode(':', $event);
-			};
+			}
 
 			if (mb_substr($module, 0, 1) == "_") {
 				$module = trim($module, '_');

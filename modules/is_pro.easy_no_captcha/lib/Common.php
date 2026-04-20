@@ -1,4 +1,4 @@
-<?
+<?php
 namespace IS_PRO\EasyNoCaptcha;
 
 class Common
@@ -20,16 +20,16 @@ class Common
 				$_SESSION['EasyNoCaptcha'] = $_GET['EasyNoCaptcha'];
 			}
 			$option['MODULE_MODE'] = $_SESSION['EasyNoCaptcha'];
-			$option['DEBUG'] = 'Y';
-		};
+			$option['DEBUG']       = 'Y';
+		}
 		if ($option['MODULE_MODE'] == 'on') {
 			if ($_GET['EasyNoCaptchaDebug'] == 'Y') {
 				$option['DEBUG'] = 'Y';
-			};
-		};
+			}
+		}
 		if (!empty($USER) && $USER->IsAdmin()) {
 			$option['MODULE_MODE'] = 'off';
-		};
+		}
 
 		$option['MODULE_CONFIG'] = $arModuleCfg;
 
@@ -41,11 +41,11 @@ class Common
 
 		$option['ReturnPureJS'] = false;
 
-		$option['encode'] = true;
-		$option['checkDefault'] = true;
-		$option['checkIP'] = true;
+		$option['encode']            = true;
+		$option['checkDefault']      = true;
+		$option['checkIP']           = true;
 		$option['script_attributes'] = '';
-		$option['debugENC'] = false;
+		$option['debugENC']          = false;
 
 
 		if (!empty($customOption)) {
@@ -68,19 +68,21 @@ class Common
 		}
 
 		$ENC = new EasyNoCaptcha([
-			'encode' => $option['encode'],
-			'checkDefault' => $option['checkDefault'],
-			'checkIP' => $option['checkIP'],
-			'ReturnPureJS' => $option['ReturnPureJS'],
-			'GoogleReCaptcha_key' => $option['USE_RECAPTCHA'] == 'Y' ? $option['RECAPTCHA_SITE_KEY'] : '',
-			'GoogleRecaptcha_SecretKey' => $option['USE_RECAPTCHA'] == 'Y' ? $option['RECAPTCHA_SECRET_KEY'] : '',
-			'hCaptcha_key' => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SITE_KEY'] : '',
-			'hCaptcha_SecretKey' => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SECRET_KEY'] : '',
-			'YandexSmartCaptcha_key' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SITE_KEY'] : '',
+			'encode'                       => $option['debugENC'] ? false : true,
+			'checkDefault'                 => $option['checkDefault'],
+			'checkIP'                      => $option['checkIP'],
+			'ReturnPureJS'                 => $option['ReturnPureJS'],
+			'GoogleReCaptcha_key'          => $option['USE_RECAPTCHA'] == 'Y' ? $option['RECAPTCHA_SITE_KEY'] : '',
+			'GoogleRecaptcha_SecretKey'    => $option['USE_RECAPTCHA'] == 'Y' ? $option['RECAPTCHA_SECRET_KEY'] : '',
+			'hCaptcha_key'                 => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SITE_KEY'] : '',
+			'hCaptcha_SecretKey'           => $option['USE_HCAPTCHA'] == 'Y' ? $option['HCAPTCHA_SECRET_KEY'] : '',
+			'YandexSmartCaptcha_key'       => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SITE_KEY'] : '',
 			'YandexSmartCaptcha_SecretKey' => $option['USE_YANDEXCAPTCHA'] == 'Y' ? $option['YANDEXCAPTCHA_SECRET_KEY'] : '',
-			'script_attributes' => !empty($option['script_attributes']) ? $option['script_attributes'] : '',
-			'debug' => $option['debugENC'] ? true : false,
-			'forms_selector' => $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form'
+			'script_attributes'            => !empty($option['script_attributes']) ? $option['script_attributes'] : '',
+			'debug'                        => $option['debugENC'] ? true : false,
+			'form_selector'                => $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form',
+			'enc_place'                    => $option['ENC_SELECTOR'],
+			'InitOnJsEvent'                => $option['INIT_JS_EVENT'],
 		]);
 
 		return $ENC;
@@ -88,8 +90,8 @@ class Common
 	public static function getScript(array $customOption = [])
 	{
 		$option = self::getOptions($customOption);
-		$ENC     = self::ENC($option);
-		$result  = $ENC->SetEasyNoCaptcha($option['PROTECT_LEVEL'], $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form');
+		$ENC    = self::ENC($option);
+		$result = $ENC->SetEasyNoCaptcha($option['PROTECT_LEVEL'], $option['FORM_SELECTOR'] ? $option['FORM_SELECTOR'] : 'form');
 		return $result;
 	}
 
@@ -98,18 +100,18 @@ class Common
 	{
 		global $APPLICATION;
 		$option = self::getOptions($customOption);
-		$ENC = self::ENC( $option);
-		$result  = $ENC->CheckEasyNoCaptha();
-		$event = new \Bitrix\Main\Event($option['MODULE_ID'], "AfterCheckEasyNoCaptha", [&$result, &$param1, &$param2, &$param3, &$param4, &$param5, &$param6]);
+		$ENC    = self::ENC($option);
+		$result = $ENC->CheckEasyNoCaptha();
+		$event  = new \Bitrix\Main\Event($option['MODULE_ID'], "AfterCheckEasyNoCaptha", [&$result, &$param1, &$param2, &$param3, &$param4, &$param5, &$param6]);
 		$event->send();
 		if (!$result) {
 			if (isset($option['LOG']) && $option['LOG'] == 'Y') {
 				\CEventLog::Add(array(
-					"SEVERITY" => "SECURITY",
+					"SEVERITY"      => "SECURITY",
 					"AUDIT_TYPE_ID" => "Captcha error",
-					"MODULE_ID" => $option['MODULE_CONFIG']['MODULE_ID'],
-					"ITEM_ID" => $option['MODULE_CONFIG']['MODULE_ID'],
-					"DESCRIPTION" => "Не пройдена каптча. \n" . print_r($_SERVER, true),
+					"MODULE_ID"     => $option['MODULE_CONFIG']['MODULE_ID'],
+					"ITEM_ID"       => $option['MODULE_CONFIG']['MODULE_ID'],
+					"DESCRIPTION"   => "Не пройдена каптча. \n" . print_r($_SERVER, true),
 				));
 			}
 			$APPLICATION->ThrowException($option['CAPTCHA_ERROR']);
