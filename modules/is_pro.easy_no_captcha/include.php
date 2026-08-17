@@ -9,6 +9,7 @@ $arClasses = array(
 	/* Библиотеки и слассы для авто загрузки */
 	'IS_PRO\EasyNoCaptcha\EasyNoCaptcha' => 'lib/Easynocaptcha.php',
 	'IS_PRO\EasyNoCaptcha\Events'        => 'lib/Events.php',
+	'IS_PRO\EasyNoCaptcha\Antibot'       => 'lib/Antibot.php',
 	'IS_PRO\EasyNoCaptcha\Common'        => 'lib/Common.php',
 );
 

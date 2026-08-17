@@ -108,3 +108,20 @@ $MESS['ISPRO_EasyNoCaptcha_CAPTCHA_ERROR'] = 'Сообщение о подозр
 $MESS['ISPRO_EasyNoCaptcha_INIT_JS_EVENT'] = 'JS event инициализирующее работу каптчи';
 $MESS['ISPRO_EasyNoCaptcha_ENC_SELECTOR']  = 'Селестор элемента в форме для размещения каптчи';
 $MESS['ISPRO_EasyNoCaptcha_LOG']           = 'Записывать в журнал неуспешные случаи прохождения каптчи';
+
+$MESS['ISPRO_EasyNoCaptcha_ANTIBOT_TITLE'] = '<h2>Защита сайта от ботов</h2>';
+
+$MESS['ISPRO_EasyNoCaptcha_ANTIBOT_TITLE']      = '<h2>Защита сайта от ботов</h2>';
+
+$MESS['ISPRO_EasyNoCaptcha_ANTIBOT']            = 'Включить защиту от ботов';
+$MESS['ISPRO_EasyNoCaptcha_ANTIBOT_RULES']      = 'Правила работы с ботами, что отображать определенным ботам';
+$MESS['ISPRO_EasyNoCaptcha_ANTIBOT_HEADER']     = '
+	<tr>
+		<th>Наименование</th>
+		<th>UserAgent содержит</th>
+		<th>Отображать страницу</th>
+		<th>JS</th>
+		<th>CSS</th>
+		<th title="">Alert Captcha</th>
+	</tr>
+';

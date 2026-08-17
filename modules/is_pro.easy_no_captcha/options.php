@@ -220,46 +220,56 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 			<?php $option_name_def = $option_name; ?>
 			<?php $option_name     = $option_name . '_' . $sId; ?>
 			<tr>
-				<td width="50%" valign="top">
-					<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) ?>
-				</td>
+				<?php if (empty($arOption) || count($arOption) == 0): ?>
+					<td valign="top" cellspan="2">
+						<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) ?>
+					</td>
+				<?php else: ?>
+					<td width="50%" valign="top">
+						<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def) ?>
+					</td>
 
-				<td width="50%">
-					<?php if ($arOption['type'] == 'textarea'): ?>
-						<textarea name="option_<?= $option_name ?>"><?= HtmlFilter::encode($option[$option_name]) ?></textarea>
-					<?php elseif ($arOption['type'] == 'checkbox'): ?>
-						<input type="hidden" name="option_<?= $option_name ?>" value="N" />
-						<input type="checkbox" name="option_<?= $option_name ?>" value="Y" <?= ($option[$option_name] == "Y") ? 'checked="checked"' : '' ?> />
-					<?php elseif ($arOption['type'] == 'select'): ?>
-						<select name="option_<?= $option_name ?>">
-							<?php foreach ($arOption['values'] as $value): ?>
-								<option value="<?= $value ?>" <?= ($option[$option_name] == $value) ? 'selected' : '' ?>>
-									<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def . '_' . $value) ?>
-								</option>
-							<?php endforeach ?>
-						</select>
-					<?php elseif ($arOption['type'] == 'file'): ?>
-						<?php
-						echo CFile::InputFile(
-							$option_name, 									//FieldName
-							20,												//field_size
-							$option[$option_name], 							//ImageID
-							'/upload/', 									//ImageStorePath
-							0,												//file_max_size
-							$arOption['ext'],								//FileType
-							"",												//field_file
-							0,												//description_size
-							"class=typeinput",								//field_text
-							"",												//field_checkbox
-							true,											//ShowNotes
-							true											//ShowFilePath
-						);
-						?>
-					<?php else: ?>
-						<input type="<?= $arOption['type'] ?>" name="option_<?= $option_name ?>"
-							value="<?= HtmlFilter::encode($option[$option_name]) ?>" />
-					<?php endif ?>
-				</td>
+					<td width="50%">
+
+						<?php if (file_exists(__DIR__ . '/option_' . $option_name_def . '.php')) :?>
+							<?php include(__DIR__ . '/option_' . $option_name_def . '.php')?>
+						<?php elseif ($arOption['type'] == 'textarea'): ?>
+							<textarea name="option_<?= $option_name ?>"><?= HtmlFilter::encode($option[$option_name]) ?></textarea>
+						<?php elseif ($arOption['type'] == 'checkbox'): ?>
+							<input type="hidden" name="option_<?= $option_name ?>" value="N" />
+							<input type="checkbox" name="option_<?= $option_name ?>" value="Y" <?= ($option[$option_name] == "Y") ? 'checked="checked"' : '' ?> />
+						<?php elseif ($arOption['type'] == 'select'): ?>
+							<select name="option_<?= $option_name ?>">
+								<?php foreach ($arOption['values'] as $value): ?>
+									<option value="<?= $value ?>" <?= ($option[$option_name] == $value) ? 'selected' : '' ?>>
+										<?= Loc::getMessage('ISPRO_EasyNoCaptcha_' . $option_name_def . '_' . $value) ?>
+									</option>
+								<?php endforeach ?>
+							</select>
+						<?php elseif ($arOption['type'] == 'file'): ?>
+							<?php
+							echo CFile::InputFile(
+								$option_name, 									//FieldName
+								20,												//field_size
+								$option[$option_name], 							//ImageID
+								'/upload/', 									//ImageStorePath
+								0,												//file_max_size
+								$arOption['ext'],								//FileType
+								"",												//field_file
+								0,												//description_size
+								"class=typeinput",								//field_text
+								"",												//field_checkbox
+								true,											//ShowNotes
+								true											//ShowFilePath
+							);
+							?>
+						<?php else: ?>
+							<input type="<?= $arOption['type'] ?>" name="option_<?= $option_name ?>"
+								value="<?= HtmlFilter::encode($option[$option_name]) ?>" />
+
+						<?php endif; ?>
+					</td>
+				<?php endif; ?>
 			</tr>
 		<?php endforeach ?>
 		<tr>
@@ -272,7 +282,7 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 			</td>
 		</tr>
 
-	<?php endforeach ?>
+	<?php endforeach; ?>
 
 	<?php $tabControl->Buttons(); ?>
 

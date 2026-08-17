@@ -27,8 +27,9 @@ class Events
 			return true;
 		}
 
-		\Bitrix\Main\Page\Asset::getInstance()->addString('<script defer data-id="ENC" data-skip-moving="true" src="' . $option['URL_PATH'] . '/script.php"></script>');
-
+		if (!Antibot::isBot()) {
+			\Bitrix\Main\Page\Asset::getInstance()->addString('<script defer data-id="ENC" data-skip-moving="true" src="' . $option['URL_PATH'] . '/script.php"></script>');
+		}
 
 		$eventManager = \Bitrix\Main\EventManager::getInstance();
 

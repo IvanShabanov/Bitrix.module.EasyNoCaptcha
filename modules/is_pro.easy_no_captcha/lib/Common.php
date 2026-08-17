@@ -1,6 +1,7 @@
 <?php
 namespace IS_PRO\EasyNoCaptcha;
 
+
 class Common
 {
 	public static function getOptions(array $customOption = [])
@@ -118,4 +119,6 @@ class Common
 		}
 		return $result;
 	}
+
+
 }
