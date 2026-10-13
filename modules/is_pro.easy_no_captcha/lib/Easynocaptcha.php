@@ -138,6 +138,124 @@ if (!class_exists('EasyNoCaptcha')) {
 			}
 
 			$result = '
+
+
+				(function () {
+				const '.$this->T('BotDetector').' = {
+					'.$this->T('isChecked').': false,
+					'.$this->T('isBot').': false,
+					'.$this->T('score').': 0,
+					'.$this->T('signals').': [],
+					'.$this->T('startTime').': performance.now(),
+
+					'.$this->T('flag').'(name, weight) {
+					this.'.$this->T('score').' += weight;
+					this.'.$this->T('signals').'.push({ name, weight });
+					},
+
+					'.$this->T('checkUserAgent').'() {
+					const '.$this->T('ua').' = navigator.userAgent || "";
+					const '.$this->T('botPatterns').' = [/headless/i, /bot/i, /crawl/i, /spider/i, /phantom/i, /puppeteer/i, /playwright/i, /selenium/i, /webdriver/i, /python-requests/i, /curl\//i, /wget/i, /axios\//i];
+					if (!'.$this->T('ua').') this.'.$this->T('flag').'("empty_user_agent", 5);
+					if ('.$this->T('botPatterns').'.some(re => re.test('.$this->T('ua').'))) this.'.$this->T('flag').'("bot_ua_pattern", 4);
+					},
+
+					'.$this->T('checkAutomationFlags').'() {
+					if (navigator.webdriver === true) this.'.$this->T('flag').'("navigator_webdriver", 5);
+					if (window.callPhantom || window._phantom) this.'.$this->T('flag').'("phantomjs", 5);
+					if (window.__nightmare) this.'.$this->T('flag').'("nightmare", 5);
+					if (window.Buffer || window.emit || window.spawn) this.'.$this->T('flag').'("node_in_browser", 4);
+					if (navigator.plugins && navigator.plugins.length === 0) this.'.$this->T('flag').'("no_plugins", 1);
+					if (!navigator.languages || navigator.languages.length === 0) this.'.$this->T('flag').'("no_languages", 2);
+					if (navigator.hardwareConcurrency === 0) this.'.$this->T('flag').'("no_hw_concurrency", 2);
+					},
+
+					'.$this->T('checkWebGL').'() {
+					try {
+						const canvas = document.createElement("canvas");
+						const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+						if (!gl) { this.'.$this->T('flag').'("no_webgl", 3); return; }
+						const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+						if (dbg) {
+						const renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "";
+						if (/swiftshader|llvmpipe|mesa|software/i.test(renderer)) {
+							this.'.$this->T('flag').'("software_webgl", 3);
+						}
+						if (/headless/i.test(renderer)) this.'.$this->T('flag').'("headless_webgl", 5);
+						}
+					} catch (e) { }
+					},
+
+					'.$this->T('checkCanvas').'() {
+					try {
+						const c = document.createElement("canvas");
+						c.width = 200; c.height = 40;
+						const ctx = c.getContext("2d");
+						ctx.textBaseline = "top";
+						ctx.font = "14px Arial";
+						ctx.fillStyle = "#f60";
+						ctx.fillRect(0, 0, 200, 40);
+						ctx.fillStyle = "#069";
+						ctx.fillText("BotDetect", 2, 15);
+						const data = c.toDataURL();
+						if (!data || data.length < 100) this.'.$this->T('flag').'("empty_canvas", 3);
+					} catch (e) { this.'.$this->T('flag').'("canvas_error", 2); }
+					},
+
+					'.$this->T('watchBehavior').'(timeoutMs = 3000) {
+					let '.$this->T('moved').' = false, '.$this->T('keyed').' = false, '.$this->T('touched').' = false;
+					const '.$this->T('onMove').' = () => { '.$this->T('moved').' = true; '.$this->T('cleanup').'(); };
+					const '.$this->T('onKey').' = () => { '.$this->T('keyed').' = true; '.$this->T('cleanup').'(); };
+					const '.$this->T('onTouch').' = () => { '.$this->T('touched').' = true; '.$this->T('cleanup').'(); };
+
+					const '.$this->T('cleanup').' = () => {
+						window["removeEventListener"]("mousemove", '.$this->T('onMove').');
+						window["removeEventListener"]("keydown", '.$this->T('onKey').');
+						window["removeEventListener"]("touchstart", '.$this->T('onTouch').');
+					};
+					window["addEventListener"]("mousemove", '.$this->T('onMove').', { passive: true });
+					window["addEventListener"]("keydown", '.$this->T('onKey').');
+					window["addEventListener"]("touchstart", '.$this->T('onTouch').', { passive: true });
+
+					return new Promise(resolve => {
+						setTimeout(() => {
+						if (!'.$this->T('moved').' && !'.$this->T('keyed').' && !'.$this->T('touched').') this.'.$this->T('flag').'("no_user_activity", 3);
+						resolve();
+						}, timeoutMs);
+					});
+					},
+
+					'.$this->T('checkApis').'() {
+					if (typeof window.requestAnimationFrame !== "function") this.'.$this->T('flag').'("no_raf", 2);
+					if (!("ontouchstart" in window) && navigator.maxTouchPoints > 0) this.'.$this->T('flag').'("touch_inconsistency", 2);
+					if (navigator.deviceMemory === 0) this.'.$this->T('flag').'("zero_device_memory", 1);
+					const navStr = Function.prototype.toString.call(Object.getOwnPropertyDescriptor(Navigator.prototype, "userAgent")?.get || function(){});
+					if (!/\[native code\]/.test(navStr)) this.'.$this->T('flag').'("patched_navigator", 4);
+					},
+
+					async '.$this->T('analyze').'() {
+					this.'.$this->T('checkUserAgent').'();
+					this.'.$this->T('checkAutomationFlags').'();
+					this.'.$this->T('checkWebGL').'();
+					this.'.$this->T('checkCanvas').'();
+					this.'.$this->T('checkApis').'();
+					await this.'.$this->T('watchBehavior').'(2500);
+
+					const '.$this->T('isLikelyBot').' = this.'.$this->T('score').' >= 5;
+					return {
+						'.$this->T('isBot').': '.$this->T('isLikelyBot').'
+					};
+					}
+				};
+
+				'.$this->T('BotDetector').'.'.$this->T('analyze').'().then((result) => {
+					'.$this->T('BotDetector').'.'.$this->T('isChecked').'= true;
+					'.$this->T('BotDetector').'.'.$this->T('isBot').' = result.'.$this->T('isBot').'
+				});
+
+				window.'.$this->T('BotDetector').' = '.$this->T('BotDetector').';
+				})();
+
 				document["addEventListener"]("' . $this->_ENC_setting['InitOnJsEvent'] . '", function(event) {
 					const ' . $this->T('document2') . ' = document;
 					let ' . $this->T('chechsum') . ' = 0;
@@ -155,9 +273,11 @@ if (!class_exists('EasyNoCaptcha')) {
 								' . $this->T('HASH') . '["type"] = "hidden";
 								' . $this->T('HASH') . '["name"] = "HASH";
 								' . $this->T('HASH') . '["value"] = "' . $HASH . '";
+								if (window.'.$this->T('BotDetector').'.'.$this->T('isChecked').' == true && window.'.$this->T('BotDetector').'.'.$this->T('isBot').'==false) {
 								' . $this->T('form3') . '["appendChild"](' . $this->T('HASHCODE') . ');
 								' . $this->T('form3') . '["appendChild"](' . $this->T('HASH') . ');
 								' . $this->T('form3') . '["classList"]["add"]("' . $_CheckedForm . '");
+								}
 							});
 						};
 					};
