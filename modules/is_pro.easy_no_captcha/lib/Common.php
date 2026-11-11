@@ -38,6 +38,14 @@ class Common
 
 		$option['URL_PATH'] = explode($option['DOCUMENT_ROOT'], __DIR__)[1];
 
+		if (empty($option['URL_PATH'])) {
+			if (strpos(__DIR__, '/bitrix/')) {
+				$option['URL_PATH'] =  '/bitrix/' . explode('/bitrix/', __DIR__)[1];
+			} else {
+				$option['URL_PATH'] =  '/local/' . explode('/local/', __DIR__)[1];
+			}
+		}
+
 		$option['MODULE_ID'] = $arModuleCfg['MODULE_ID'];
 
 		$option['ReturnPureJS'] = false;
